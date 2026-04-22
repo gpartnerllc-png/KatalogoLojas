@@ -1,0 +1,2 @@
+# KatalogoLojas
+Lojas de Produtos.
