@@ -1,0 +1,214 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Catálogo de Produtos | Grupo Apoio</title>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <style>
+        /* CSS INTEGRADO PARA O ESTILO CANVA CATALOG */
+        :root {
+            --primary: #00d2ff;
+            --dark-bg: #0f1016;
+            --card-bg: #1a1c24;
+            --text: #ffffff;
+            --accent: #3a3f50;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Poppins', sans-serif; }
+
+        body { background-color: var(--dark-bg); color: var(--text); overflow-x: hidden; }
+
+        header {
+            padding: 40px 20px;
+            text-align: center;
+            background: linear-gradient(180deg, #1a1c24 0%, #0f1016 100%);
+        }
+
+        header h1 { font-size: 2.5rem; letter-spacing: 2px; text-transform: uppercase; color: var(--primary); }
+        header p { opacity: 0.8; margin-top: 10px; }
+
+        /* Grid do Catálogo */
+        .catalog-container {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 25px;
+            padding: 40px 20px;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        /* Estilo dos Cards (Baseado no Layout do Canva) */
+        .product-card {
+            background: var(--card-bg);
+            border-radius: 15px;
+            overflow: hidden;
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+            border: 1px solid var(--accent);
+            display: flex;
+            flex-direction: column;
+        }
+
+        .product-card:hover {
+            transform: translateY(-10px);
+            box-shadow: 0 10px 25px rgba(0, 210, 255, 0.2);
+        }
+
+        .product-image {
+            width: 100%;
+            height: 250px;
+            background: #2a2d3a;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+        }
+
+        .product-image img { width: 100%; height: 100%; object-fit: cover; }
+
+        .product-info { padding: 20px; flex-grow: 1; text-align: center; }
+
+        .product-info h3 { margin-bottom: 10px; font-size: 1.2rem; }
+
+        .price { color: var(--primary); font-weight: bold; font-size: 1.4rem; margin-bottom: 15px; display: block; }
+
+        .btn-order {
+            background: var(--primary);
+            color: #000;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 25px;
+            font-weight: 600;
+            cursor: pointer;
+            width: 100%;
+            transition: 0.3s;
+        }
+
+        .btn-order:hover { filter: brightness(1.1); }
+
+        /* Modal do Pedido */
+        #orderModal {
+            display: none;
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0,0,0,0.9);
+            z-index: 1000;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .modal-content {
+            background: var(--card-bg);
+            padding: 30px;
+            border-radius: 15px;
+            width: 90%;
+            max-width: 400px;
+            border: 1px solid var(--primary);
+        }
+
+        input, textarea {
+            width: 100%;
+            padding: 12px;
+            margin: 10px 0;
+            background: #2a2d3a;
+            border: 1px solid var(--accent);
+            color: white;
+            border-radius: 8px;
+        }
+
+        footer { text-align: center; padding: 40px; opacity: 0.6; font-size: 0.9rem; }
+    </style>
+</head>
+<body>
+
+    <header>
+        <h1>Catálogo Grupo Apoio</h1>
+        <p>Selecione os itens e finalize via Telegram</p>
+    </header>
+
+    <main class="catalog-container">
+        <div class="product-card">
+            <div class="product-image">
+                <img src="https://via.placeholder.com/300x250" alt="Produto 1">
+            </div>
+            <div class="product-info">
+                <h3>Serviço de Performance 01</h3>
+                <span class="price">R$ 299,00</span>
+                <button class="btn-order" onclick="openModal('Serviço de Performance 01', 'R$ 299,00')">Pedir Agora</button>
+            </div>
+        </div>
+
+        <div class="product-card">
+            <div class="product-image">
+                <img src="https://via.placeholder.com/300x250" alt="Produto 2">
+            </div>
+            <div class="product-info">
+                <h3>Dashboard</h3>
+                <span class="price">R$ 597,00</span>
+                <button class="btn-order" onclick="openModal('Dashboard 7X Ultra', 'R$ 597,00')">Pedir Agora</button>
+            </div>
+        </div>
+
+        </main>
+
+    <div id="orderModal">
+        <div class="modal-content">
+            <h2 id="modalTitle">Finalizar Pedido</h2>
+            <p id="modalPrice" style="color: var(--primary); margin-bottom: 15px;"></p>
+            <input type="text" id="userName" placeholder="Seu Nome" required>
+            <textarea id="userNote" placeholder="Alguma observação?"></textarea>
+            <button class="btn-order" onclick="sendToTelegram()">Enviar Pedido no Telegram</button>
+            <button onclick="closeModal()" style="background:none; border:none; color:white; margin-top:15px; cursor:pointer; width:100%;">Cancelar</button>
+        </div>
+    </div>
+
+    <footer>
+        <p>SandxCDD &copy; 2026 | Gestão de Performance</p>
+    </footer>
+
+    <script>
+        let selectedProduct = "";
+        let selectedPrice = "";
+
+        // CONFIGURAÇÕES DO TELEGRAM
+        const BOT_TOKEN = "SEU_TOKEN_AQUI"; 
+        const CHAT_ID = "SEU_CHAT_ID_AQUI";
+
+        function openModal(name, price) {
+            selectedProduct = name;
+            selectedPrice = price;
+            document.getElementById('modalTitle').innerText = name;
+            document.getElementById('modalPrice').innerText = price;
+            document.getElementById('orderModal').style.display = 'flex';
+        }
+
+        function closeModal() {
+            document.getElementById('orderModal').style.display = 'none';
+        }
+
+        function sendToTelegram() {
+            const name = document.getElementById('userName').value;
+            const note = document.getElementById('userNote').value;
+
+            if(!name) { alert("Por favor, digite seu nome."); return; }
+
+            const message = `🛍️ *Novo Pedido do Catálogo*\n\n` +
+                            `📦 *Produto:* ${selectedProduct}\n` +
+                            `💰 *Valor:* ${selectedPrice}\n` +
+                            `👤 *Cliente:* ${name}\n` +
+                            `📝 *Nota:* ${note}`;
+
+            const url = `https://api.telegram.org/bot${BOT_TOKEN}/sendMessage?chat_id=${CHAT_ID}&text=${encodeURIComponent(message)}&parse_mode=Markdown`;
+
+            fetch(url).then(res => {
+                if(res.ok) {
+                    alert("Pedido enviado com sucesso para o Telegram!");
+                    closeModal();
+                } else {
+                    alert("Erro ao enviar pedido. Verifique as credenciais.");
+                }
+            });
+        }
+    </script>
+</body>
+</html>
