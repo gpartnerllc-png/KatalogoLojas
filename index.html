@@ -71,41 +71,54 @@
 
     <div id="painel-carrinho" class="fixed top-0 right-0 w-full sm:w-[450px] h-full glass-panel bg-[#050505]/98 z-[100] transform translate-x-full transition-transform duration-300 flex flex-col border-l border-white/10 shadow-2xl">
         <div class="p-6 border-b border-white/10 flex justify-between items-center">
-            <h2 class="text-xl font-bold">Sua Sacola</h2>
+            <h2 class="text-xl font-bold uppercase italic tracking-tighter">Sua <span class="amazon-orange">Sacola</span></h2>
             <button onclick="toggleCarrinho()" class="text-gray-400 hover:text-white p-2"><i class="fas fa-times text-xl"></i></button>
         </div>
 
         <div id="itens-carrinho" class="flex-1 overflow-y-auto p-4 space-y-4 no-scrollbar">
             </div>
 
-        <div class="p-6 bg-black/50 space-y-4">
-            <div class="flex justify-between font-bold text-lg">
-                <span>Total:</span>
-                <span id="total-carrinho" class="text-cyan-400">R$ 0,00</span>
+        <div class="p-6 bg-black/60 border-t border-white/10 space-y-4">
+            <div id="checkout-detalhado" class="p-4 space-y-3 bg-white/5 rounded-xl border border-white/5">
+                <p class="text-[10px] text-cyan-400 uppercase tracking-widest font-bold mb-2">Dados de Faturamento</p>
+                <input type="text" id="cli-nome" placeholder="Nome Completo" class="w-full bg-black/40 border border-white/10 rounded-lg p-2 text-sm outline-none focus:border-orange-500 transition">
+                <div class="flex gap-2">
+                    <input type="email" id="cli-email" placeholder="E-mail" class="w-1/2 bg-black/40 border border-white/10 rounded-lg p-2 text-sm outline-none">
+                    <input type="tel" id="cli-whats" placeholder="WhatsApp" class="w-1/2 bg-black/40 border border-white/10 rounded-lg p-2 text-sm outline-none">
+                </div>
+                <div class="flex gap-2">
+                    <input type="text" id="cli-cep" onkeyup="buscarCEP_Completo(this.value)" placeholder="CEP" maxlength="9" class="w-1/3 bg-white/10 border border-cyan-500/30 rounded-lg p-2 text-sm text-cyan-400 font-bold outline-none">
+                    <input type="text" id="cli-rua" placeholder="Endereço Completo" class="w-2/3 bg-black/20 border border-white/10 rounded-lg p-2 text-[10px] text-gray-400" readonly>
+                </div>
+                <div id="status-mapa" class="hidden text-[9px] bg-green-500/10 text-green-400 p-2 rounded border border-green-500/20 items-center gap-2">
+                    <i class="fas fa-street-view"></i> Localização validada via Google Street View
+                </div>
             </div>
-            
+
             <div class="space-y-2">
-                <input type="text" id="cep-input" onkeyup="buscarCEP_RTK(this.value)" placeholder="CEP de Entrega" class="w-full bg-white/5 border border-white/10 rounded p-2 text-sm">
-                <select id="metodo-pag" onchange="mudarPagamento()" class="w-full bg-white/10 border border-white/10 rounded p-2 text-sm">
-                    <option value="Pix">PIX (Confirmação Imediata)</option>
-                    <option value="Cartao">Cartão de Crédito/Débito</option>
-                </select>
+                <p class="text-[10px] text-gray-400 uppercase tracking-widest font-bold ml-1">Forma de Pagamento</p>
+                <div class="grid grid-cols-2 gap-2">
+                    <button onclick="selecionarPag('Pix')" id="btn-pag-pix" class="flex items-center justify-center gap-2 p-3 rounded-xl border border-white/10 bg-white/5 hover:border-green-500 transition-all">
+                        <i class="fab fa-pix text-green-400"></i> <span class="text-[10px] font-bold">PIX</span>
+                    </button>
+                    <button onclick="selecionarPag('Cartao')" id="btn-pag-card" class="flex items-center justify-center gap-2 p-3 rounded-xl border border-white/10 bg-white/5 hover:border-blue-500 transition-all">
+                        <i class="fas fa-credit-card text-blue-400"></i> <span class="text-[10px] font-bold">CARTÃO</span>
+                    </button>
+                </div>
             </div>
 
-            <div id="box-pix" class="bg-white p-4 rounded-lg text-center hidden">
-                <p class="text-black text-[10px] font-bold mb-2 uppercase">Escaneie para pagar</p>
-                <img id="qr-pix" src="" class="w-32 h-32 mx-auto mb-2">
-                <button onclick="copiarPix()" class="text-[10px] bg-black text-white px-3 py-1 rounded">Copiar Código PIX</button>
+            <div class="flex justify-between font-bold text-lg pt-2 border-t border-white/5">
+                <span class="text-sm">Total do Pedido:</span>
+                <span id="total-carrinho" class="text-orange-400 font-black">R$ 0,00</span>
             </div>
 
-            <button onclick="finalizarParaVendedor()" class="w-full bg-amazon-orange text-black font-bold py-3 rounded-md hover:bg-orange-500 transition uppercase tracking-tighter">
+            <button onclick="finalizarParaVendedor()" class="w-full bg-amazon-orange text-black font-extrabold py-4 rounded-lg hover:bg-orange-500 transition uppercase shadow-lg shadow-orange-500/20">
                 Finalizar via Telegram
             </button>
         </div>
     </div>
 
     <script>
-        // BANCO DE DADOS (Simulando o que viria do XML/Sistema)
         const db_estoque = [
             { id: 101, nome: "Parafuso Sextavado Aço 8.8", preco: 145.90, img: "https://via.placeholder.com/200", loja: "Atacadão Ferragens" },
             { id: 102, nome: "Dashboard Performance SandxCDD", preco: 597.00, img: "https://via.placeholder.com/200", loja: "Digital Solutions" },
@@ -113,8 +126,9 @@
         ];
 
         let sacola = [];
+        let metodoSelecionado = "";
+        let fecharTimer;
 
-        // RENDERIZAR PRODUTOS INICIAIS
         function renderizar(lista) {
             const grid = document.getElementById('productGrid');
             grid.innerHTML = lista.map(p => `
@@ -134,41 +148,61 @@
             `).join('');
         }
 
-        // BUSCA EM TEMPO REAL (MISTURA XML/LOGÍSTICA)
-        function filtrarProdutos() {
-            const query = document.getElementById('mainSearch').value.toLowerCase();
-            const feedback = document.getElementById('search-feedback');
-            
-            if(query.length > 0) feedback.innerText = `Buscando em sistema: "${query}"...`;
-            else feedback.innerText = "";
-
-            const filtrados = db_estoque.filter(p => p.nome.toLowerCase().includes(query));
-            renderizar(filtrados);
-        }
-
-        // CARRINHO E TELEGRAM
+        // ADICIONAR E AUTO-CONTROLE DA SACOLA
         function addSacola(id) {
             const item = db_estoque.find(p => p.id === id);
             sacola.push(item);
             atualizarCarrinho();
+            
+            // Abre automático
+            const painel = document.getElementById('painel-carrinho');
+            painel.classList.remove('translate-x-full');
+            
+            // Fecha automático após 3 segundos
+            clearTimeout(fecharTimer);
+            fecharTimer = setTimeout(() => {
+                painel.classList.add('translate-x-full');
+            }, 3000);
+        }
+
+        // BUSCADOR AUTOMÁTICO DE CEP
+        async function buscarCEP_Completo(cep) {
+            cep = cep.replace(/\D/g, '');
+            if (cep.length === 8) {
+                try {
+                    const res = await fetch(`https://viacep.com.br/ws/${cep}/json/`);
+                    const data = await res.json();
+                    if (!data.erro) {
+                        document.getElementById('cli-rua').value = `${data.logradouro}, ${data.bairro} - ${data.localidade}/${data.uf}`;
+                        document.getElementById('status-mapa').classList.remove('hidden');
+                        document.getElementById('status-mapa').classList.add('flex');
+                    }
+                } catch (e) { console.error("Busca falhou"); }
+            }
+        }
+
+        function selecionarPag(metodo) {
+            metodoSelecionado = metodo;
+            const bPix = document.getElementById('btn-pag-pix');
+            const bCard = document.getElementById('btn-pag-card');
+            
+            bPix.className = bCard.className = "flex items-center justify-center gap-2 p-3 rounded-xl border border-white/10 bg-white/5 transition-all";
+            
+            if(metodo === 'Pix') bPix.classList.add('border-green-500', 'bg-green-500/10', 'ring-1', 'ring-green-500');
+            else bCard.classList.add('border-blue-500', 'bg-blue-500/10', 'ring-1', 'ring-blue-500');
         }
 
         function atualizarCarrinho() {
             document.getElementById('cart-count').innerText = sacola.length;
             const container = document.getElementById('itens-carrinho');
             let total = 0;
-
-            container.innerHTML = sacola.map((item, i) => {
+            container.innerHTML = sacola.map(item => {
                 total += item.preco;
-                return `
-                    <div class="flex gap-4 border-b border-white/5 pb-3">
-                        <img src="${item.img}" class="w-12 h-12 bg-white rounded">
-                        <div class="flex-1">
-                            <h4 class="text-xs font-bold">${item.nome}</h4>
-                            <p class="text-cyan-400 text-xs">R$ ${item.preco}</p>
-                        </div>
-                    </div>
-                `;
+                return `<div class="flex gap-4 border-b border-white/5 pb-3 items-center">
+                    <img src="${item.img}" class="w-10 h-10 bg-white rounded">
+                    <div class="flex-1 text-xs font-bold">${item.nome}</div>
+                    <div class="text-orange-400 text-xs font-bold">R$ ${item.preco.toFixed(2)}</div>
+                </div>`;
             }).join('');
             document.getElementById('total-carrinho').innerText = `R$ ${total.toLocaleString('pt-br', {minimumFractionDigits: 2})}`;
         }
@@ -177,25 +211,24 @@
             document.getElementById('painel-carrinho').classList.toggle('translate-x-full');
         }
 
-        function mudarPagamento() {
-            const met = document.getElementById('metodo-pag').value;
-            document.getElementById('box-pix').classList.toggle('hidden', met !== 'Pix');
-            if(met === 'Pix') {
-                const total = document.getElementById('total-carrinho').innerText;
-                document.getElementById('qr-pix').src = `https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=SandxCDD_Pix_${total}`;
-            }
+        function filtrarProdutos() {
+            const query = document.getElementById('mainSearch').value.toLowerCase();
+            const feedback = document.getElementById('search-feedback');
+            feedback.innerText = query ? `Buscando: "${query}"` : "";
+            renderizar(db_estoque.filter(p => p.nome.toLowerCase().includes(query)));
         }
 
         function finalizarParaVendedor() {
-            if(sacola.length === 0) return alert("Adicione itens na sacola!");
+            const nome = document.getElementById('cli-nome').value;
+            const whats = document.getElementById('cli-whats').value;
+            if(!nome || !whats || !metodoSelecionado || sacola.length === 0) {
+                return alert("Preencha todos os dados e escolha o pagamento!");
+            }
             
-            const msg = `🚀 *NOVO PEDIDO 📦 *Itens:* ${sacola.length}%0A💰 *Total:* ${document.getElementById('total-carrinho').innerText}%0A📍 *Entrega:* ${document.getElementById('cep-input').value}%0A💳 *Pagamento:* ${document.getElementById('metodo-pag').value}%0A%0A_Aguardando atendente para despacho._`;
-            
-            // Link do seu Bot de Vendas
+            const msg = `🚀 *PEDIDO👤 *Cliente:* ${nome}%0A📱 *Whats:* ${whats}%0A📍 *Entrega:* ${document.getElementById('cli-rua').value}%0A💰 *Total:* ${document.getElementById('total-carrinho').innerText}%0A💳 *Pagamento:* ${metodoSelecionado}`;
             window.open(`https://t.me/SEU_BOT_AQUI?text=${msg}`);
         }
 
-        // Iniciar
         renderizar(db_estoque);
     </script>
 </body>
