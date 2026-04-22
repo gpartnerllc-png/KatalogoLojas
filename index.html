@@ -1,178 +1,202 @@
 <!DOCTYPE html>
-<html lang="pt-br">
+<html lang="pt-br" class="scroll-smooth">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Grupo APOIO | Marketplace Inteligente</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Grupo | Marketplace</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
     <style>
-        :root {
-            --amazon-navy: #131921;
-            --amazon-orange: #ff9900;
-            --bg-gray: #eaeded;
-            --white: #ffffff;
+        body { 
+            color: #ededed; font-family: 'Inter', sans-serif;
+            background-color: #050505;
+            background-image: radial-gradient(circle at 50% 0%, #102a43 0%, #050505 70%);
+            background-attachment: fixed;
         }
-
-        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
-        body { background-color: var(--bg-gray); color: #0f1111; }
-
-        /* HEADER & SEARCH */
-        header { background-color: var(--amazon-navy); color: white; padding: 10px 0; position: sticky; top: 0; z-index: 1000; }
-        .nav-container { max-width: 1500px; margin: 0 auto; display: flex; align-items: center; gap: 20px; padding: 0 20px; }
-        
-        .logo { font-size: 1.5rem; font-weight: bold; color: white; text-decoration: none; }
-        .logo span { color: var(--amazon-orange); }
-
-        .search-wrapper { flex-grow: 1; display: flex; height: 40px; position: relative; }
-        .search-wrapper input { flex-grow: 1; border: none; border-radius: 4px 0 0 4px; padding: 0 15px; font-size: 1rem; }
-        .search-wrapper button { background-color: var(--amazon-orange); border: none; width: 50px; border-radius: 0 4px 4px 0; cursor: pointer; font-size: 1.2rem; }
-
-        /* CATALOGO & CARDS */
-        .main-content { max-width: 1500px; margin: 20px auto; padding: 0 20px; display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 20px; }
-        
-        .product-card { background: var(--white); padding: 20px; border-radius: 4px; display: flex; flex-direction: column; transition: 0.3s; }
-        .product-card:hover { transform: translateY(-5px); box-shadow: 0 5px 15px rgba(0,0,0,0.1); }
-        
-        .product-title { font-size: 1.1rem; font-weight: bold; margin-bottom: 15px; height: 50px; overflow: hidden; }
-        .img-placeholder { width: 100%; height: 200px; background: #f0f0f0; border-radius: 4px; margin-bottom: 15px; display: flex; align-items: center; justify-content: center; color: #999; }
-        
-        .price-container { font-size: 1.5rem; font-weight: bold; margin-bottom: 15px; }
-        .price-container small { font-size: 0.8rem; vertical-align: top; }
-
-        .btn-add { background-color: #ffd814; border: 1px solid #fcd200; border-radius: 20px; padding: 10px; cursor: pointer; font-weight: 600; }
-        .btn-add:hover { background-color: #f7ca00; }
-
-        /* SACOLA DE COMPRAS (MODAL) */
-        #cart-sidebar { position: fixed; right: -400px; top: 0; width: 350px; height: 100%; background: white; box-shadow: -5px 0 15px rgba(0,0,0,0.2); z-index: 2000; transition: 0.4s; padding: 20px; display: flex; flex-direction: column; }
-        #cart-sidebar.active { right: 0; }
-        .cart-header { display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #ddd; padding-bottom: 10px; }
-        .cart-items { flex-grow: 1; overflow-y: auto; margin-top: 20px; }
-        .cart-footer { border-top: 1px solid #ddd; padding-top: 20px; }
-
-        /* FORMULÁRIO DE CADASTRO */
-        .checkout-form input { width: 100%; padding: 10px; margin-bottom: 10px; border: 1px solid #ddd; border-radius: 4px; }
-        
-        .btn-telegram { background-color: #0088cc; color: white; width: 100%; padding: 12px; border: none; border-radius: 4px; cursor: pointer; font-weight: bold; }
+        .glass-panel { background: rgba(255, 255, 255, 0.03); backdrop-filter: blur(16px); border: 1px solid rgba(255, 255, 255, 0.05); }
+        .amazon-orange { color: #ff9900; }
+        .bg-amazon-orange { background-color: #ff9900; }
+        .amazon-card { transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); }
+        .amazon-card:hover { transform: translateY(-5px); border-color: rgba(8, 145, 178, 0.4); box-shadow: 0 10px 30px -10px rgba(0,0,0,0.5); }
+        .no-scrollbar::-webkit-scrollbar { display: none; }
     </style>
 </head>
-<body>
+<body class="min-h-screen overflow-x-hidden">
 
-<header>
-    <div class="nav-container">
-        <a href="#" class="logo">Grupo<span>APOIO</span></a>
-        <div class="search-wrapper">
-            <input type="text" id="searchInput" placeholder="Busque por parafusos, ferramentas, códigos..." onkeyup="filtrarProdutos()">
-            <button>🔍</button>
-        </div>
-        <div class="cart-icon" onclick="toggleCart()" style="cursor:pointer; font-size: 1.5rem;">
-            🛒 <span id="cart-count">0</span>
-        </div>
-    </div>
-</header>
+    <header class="fixed top-0 left-0 w-full z-50 glass-panel bg-[#050505]/90 border-b border-white/10">
+        <div class="max-w-7xl mx-auto px-4 py-3 flex items-center justify-between gap-4">
+            <a href="#" class="text-xl font-bold tracking-tighter">Sandx<span class="amazon-orange">CDD</span></a>
+            
+            <div class="hidden md:flex flex-col text-xs leading-tight">
+                <span class="text-gray-400">Enviar para</span>
+                <span id="loc-display" class="font-bold"><i class="fas fa-map-marker-alt"></i> Brasilia - DF</span>
+            </div>
 
-<main class="main-content" id="productGrid">
+            <div class="flex-1 max-w-2xl relative">
+                <div class="flex">
+                    <input type="text" id="mainSearch" onkeyup="filtrarProdutos()" placeholder="Buscar produtos, ferramentas ou logística..." 
+                    class="w-full bg-white text-black px-4 py-2 rounded-l-md outline-none focus:ring-2 focus:ring-orange-500">
+                    <button class="bg-amazon-orange px-5 rounded-r-md hover:bg-orange-600 transition">
+                        <i class="fas fa-search text-navy-900"></i>
+                    </button>
+                </div>
+                <div id="search-feedback" class="absolute top-12 left-0 w-full text-xs text-cyan-400 font-mono"></div>
+            </div>
+
+            <div class="flex items-center gap-6">
+                <button onclick="toggleCarrinho()" class="relative flex items-center gap-2 hover:text-orange-400 transition">
+                    <i class="fas fa-shopping-cart text-2xl"></i>
+                    <span id="cart-count" class="absolute -top-2 -right-2 bg-orange-600 text-white text-[10px] font-bold px-2 py-0.5 rounded-full">0</span>
+                    <span class="hidden md:inline font-bold">Carrinho</span>
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <main class="max-w-7xl mx-auto px-4 mt-24 pb-20">
+        <div id="rtk-status" class="glass-panel p-3 rounded-lg mb-8 border-cyan-500/30 flex items-center justify-between text-xs md:text-sm">
+            <div class="flex items-center gap-3">
+                <div class="relative w-3 h-3">
+                    <div class="absolute inset-0 bg-green-500 rounded-full animate-ping"></div>
+                    <div class="relative bg-green-500 w-3 h-3 rounded-full"></div>
+                </div>
+                <span class="font-mono text-cyan-400 tracking-widest uppercase">Sinal RTK Ativo</span>
+            </div>
+            <div class="text-gray-400" id="geo-info">Calculando</div>
+        </div>
+
+        <div id="productGrid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+            </div>
     </main>
 
-<div id="cart-sidebar">
-    <div class="cart-header">
-        <h2>Sua Sacola</h2>
-        <button onclick="toggleCart()">X</button>
-    </div>
-    <div class="cart-items" id="cartItems"></div>
-    <div class="cart-footer">
-        <h3>Total: R$ <span id="cartTotal">0,00</span></h3>
-        <div class="checkout-form">
-            <input type="text" id="custName" placeholder="Seu Nome">
-            <input type="text" id="custPhone" placeholder="Seu WhatsApp">
-            <button class="btn-telegram" onclick="finalizarPedido()">Finalizar com Vendedor</button>
+    <div id="painel-carrinho" class="fixed top-0 right-0 w-full sm:w-[450px] h-full glass-panel bg-[#050505]/98 z-[100] transform translate-x-full transition-transform duration-300 flex flex-col border-l border-white/10 shadow-2xl">
+        <div class="p-6 border-b border-white/10 flex justify-between items-center">
+            <h2 class="text-xl font-bold">Sua Sacola</h2>
+            <button onclick="toggleCarrinho()" class="text-gray-400 hover:text-white p-2"><i class="fas fa-times text-xl"></i></button>
+        </div>
+
+        <div id="itens-carrinho" class="flex-1 overflow-y-auto p-4 space-y-4 no-scrollbar">
+            </div>
+
+        <div class="p-6 bg-black/50 space-y-4">
+            <div class="flex justify-between font-bold text-lg">
+                <span>Total:</span>
+                <span id="total-carrinho" class="text-cyan-400">R$ 0,00</span>
+            </div>
+            
+            <div class="space-y-2">
+                <input type="text" id="cep-input" onkeyup="buscarCEP_RTK(this.value)" placeholder="CEP de Entrega" class="w-full bg-white/5 border border-white/10 rounded p-2 text-sm">
+                <select id="metodo-pag" onchange="mudarPagamento()" class="w-full bg-white/10 border border-white/10 rounded p-2 text-sm">
+                    <option value="Pix">PIX (Confirmação Imediata)</option>
+                    <option value="Cartao">Cartão de Crédito/Débito</option>
+                </select>
+            </div>
+
+            <div id="box-pix" class="bg-white p-4 rounded-lg text-center hidden">
+                <p class="text-black text-[10px] font-bold mb-2 uppercase">Escaneie para pagar</p>
+                <img id="qr-pix" src="" class="w-32 h-32 mx-auto mb-2">
+                <button onclick="copiarPix()" class="text-[10px] bg-black text-white px-3 py-1 rounded">Copiar Código PIX</button>
+            </div>
+
+            <button onclick="finalizarParaVendedor()" class="w-full bg-amazon-orange text-black font-bold py-3 rounded-md hover:bg-orange-500 transition uppercase tracking-tighter">
+                Finalizar via Telegram
+            </button>
         </div>
     </div>
-</div>
 
-<script>
-    // 1. Simulação de Banco de Dados (Pode ser carregado via fetch('estoque.xml'))
-    const produtos = [
-        { id: 1, nome: "Parafuso Sextavado 5/16 x 1", preco: 597.00, img: "🔩" },
-        { id: 2, nome: "Consultoria Técnica (ME)", preco: 1200.00, img: "📊" },
-        { id: 3, nome: "Kit Atacado - Ferragens", preco: 850.50, img: "📦" }
-    ];
+    <script>
+        // BANCO DE DADOS (Simulando o que viria do XML/Sistema)
+        const db_estoque = [
+            { id: 101, nome: "Parafuso Sextavado Aço 8.8", preco: 145.90, img: "https://via.placeholder.com/200", loja: "Atacadão Ferragens" },
+            { id: 102, nome: "Dashboard Performance SandxCDD", preco: 597.00, img: "https://via.placeholder.com/200", loja: "Digital Solutions" },
+            { id: 103, nome: "Kit Brocas Profissional", preco: 89.90, img: "https://via.placeholder.com/200", loja: "Loja Parceira" }
+        ];
 
-    let carrinho = [];
+        let sacola = [];
 
-    // 2. Função de Busca (Lógica que usamos no Mercado)
-    function filtrarProdutos() {
-        const query = document.getElementById('searchInput').value.toLowerCase();
-        const filtrados = produtos.filter(p => p.nome.toLowerCase().includes(query));
-        renderizarProdutos(filtrados);
-    }
+        // RENDERIZAR PRODUTOS INICIAIS
+        function renderizar(lista) {
+            const grid = document.getElementById('productGrid');
+            grid.innerHTML = lista.map(p => `
+                <div class="amazon-card glass-panel rounded-lg overflow-hidden flex flex-col">
+                    <div class="bg-white h-48 flex items-center justify-center">
+                        <img src="${p.img}" class="max-h-40 mix-blend-multiply">
+                    </div>
+                    <div class="p-4 flex-1 flex flex-col">
+                        <p class="text-[10px] text-cyan-400 font-mono uppercase">${p.loja}</p>
+                        <h3 class="font-bold text-sm h-10 overflow-hidden mb-2">${p.nome}</h3>
+                        <div class="text-xl font-bold mb-4">R$ ${p.preco.toLocaleString('pt-br', {minimumFractionDigits: 2})}</div>
+                        <button onclick="addSacola(${p.id})" class="mt-auto bg-amazon-orange text-black font-bold py-2 rounded text-xs hover:bg-orange-500 transition">
+                            Adicionar ao Carrinho
+                        </button>
+                    </div>
+                </div>
+            `).join('');
+        }
 
-    function renderizarProdutos(lista) {
-        const grid = document.getElementById('productGrid');
-        grid.innerHTML = lista.map(p => `
-            <div class="product-card">
-                <div class="img-placeholder">${p.img}</div>
-                <div class="product-title">${p.nome}</div>
-                <div class="price-container"><small>R$</small>${p.preco.toLocaleString('pt-BR', {minimumFractionDigits: 2})}</div>
-                <button class="btn-add" onclick="adicionarAoCarrinho(${p.id})">Adicionar à Sacola</button>
-            </div>
-        `).join('');
-    }
+        // BUSCA EM TEMPO REAL (MISTURA XML/LOGÍSTICA)
+        function filtrarProdutos() {
+            const query = document.getElementById('mainSearch').value.toLowerCase();
+            const feedback = document.getElementById('search-feedback');
+            
+            if(query.length > 0) feedback.innerText = `Buscando em sistema: "${query}"...`;
+            else feedback.innerText = "";
 
-    // 3. Lógica do Carrinho
-    function adicionarAoCarrinho(id) {
-        const prod = produtos.find(p => p.id === id);
-        carrinho.push(prod);
-        atualizarInterfaceCarrinho();
-        if(!document.getElementById('cart-sidebar').classList.contains('active')) toggleCart();
-    }
+            const filtrados = db_estoque.filter(p => p.nome.toLowerCase().includes(query));
+            renderizar(filtrados);
+        }
 
-    function atualizarInterfaceCarrinho() {
-        document.getElementById('cart-count').innerText = carrinho.length;
-        const itensDiv = document.getElementById('cartItems');
-        itensDiv.innerHTML = carrinho.map((item, index) => `
-            <div style="display:flex; justify-content:space-between; margin-bottom:10px;">
-                <span>${item.nome}</span>
-                <b>R$ ${item.preco}</b>
-            </div>
-        `).join('');
-        
-        const total = carrinho.reduce((acc, item) => acc + item.preco, 0);
-        document.getElementById('cartTotal').innerText = total.toLocaleString('pt-BR', {minimumFractionDigits: 2});
-    }
+        // CARRINHO E TELEGRAM
+        function addSacola(id) {
+            const item = db_estoque.find(p => p.id === id);
+            sacola.push(item);
+            atualizarCarrinho();
+        }
 
-    function toggleCart() {
-        document.getElementById('cart-sidebar').classList.toggle('active');
-    }
+        function atualizarCarrinho() {
+            document.getElementById('cart-count').innerText = sacola.length;
+            const container = document.getElementById('itens-carrinho');
+            let total = 0;
 
-    // 4. Integração Telegram (Moderno e Seguro)
-    function finalizarPedido() {
-        const nome = document.getElementById('custName').value;
-        const fone = document.getElementById('custPhone').value;
-        
-        if(!nome || !fone) return alert("Por favor, preencha seus dados de contato.");
+            container.innerHTML = sacola.map((item, i) => {
+                total += item.preco;
+                return `
+                    <div class="flex gap-4 border-b border-white/5 pb-3">
+                        <img src="${item.img}" class="w-12 h-12 bg-white rounded">
+                        <div class="flex-1">
+                            <h4 class="text-xs font-bold">${item.nome}</h4>
+                            <p class="text-cyan-400 text-xs">R$ ${item.preco}</p>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+            document.getElementById('total-carrinho').innerText = `R$ ${total.toLocaleString('pt-br', {minimumFractionDigits: 2})}`;
+        }
 
-        const BOT_TOKEN = "SEU_BOT_TOKEN"; // Use o seu token real
-        const CHAT_ID = "SEU_CHAT_ID";     // Use o seu chat id real
+        function toggleCarrinho() {
+            document.getElementById('painel-carrinho').classList.toggle('translate-x-full');
+        }
 
-        let listaItens = carrinho.map(i => `• ${i.nome} (R$ ${i.preco})`).join('%0A');
-        const total = document.getElementById('cartTotal').innerText;
-
-        const msg = `🛒 *NOVO PEDIDO - Grupo APOIO*%0A%0A👤 *Cliente:* ${nome}%0A📞 *WhatsApp:* ${fone}%0A%0A📦 *Produtos:*%0A${listaItens}%0A%0A💰 *TOTAL:* R$ ${total}%0A%0A_Aguardando finalização de pagamento (Pix/Cartão)_`;
-
-        const url = `https://api.telegram.org/bot${BOT_TOKEN}/sendMessage?chat_id=${CHAT_ID}&text=${msg}&parse_mode=Markdown`;
-
-        fetch(url).then(res => {
-            if(res.ok) {
-                alert("Pedido enviado ao vendedor! Em breve entraremos em contato.");
-                carrinho = [];
-                atualizarInterfaceCarrinho();
-                toggleCart();
+        function mudarPagamento() {
+            const met = document.getElementById('metodo-pag').value;
+            document.getElementById('box-pix').classList.toggle('hidden', met !== 'Pix');
+            if(met === 'Pix') {
+                const total = document.getElementById('total-carrinho').innerText;
+                document.getElementById('qr-pix').src = `https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=SandxCDD_Pix_${total}`;
             }
-        });
-    }
+        }
 
-    // Inicializar
-    renderizarProdutos(produtos);
-</script>
+        function finalizarParaVendedor() {
+            if(sacola.length === 0) return alert("Adicione itens na sacola!");
+            
+            const msg = `🚀 *NOVO PEDIDO 📦 *Itens:* ${sacola.length}%0A💰 *Total:* ${document.getElementById('total-carrinho').innerText}%0A📍 *Entrega:* ${document.getElementById('cep-input').value}%0A💳 *Pagamento:* ${document.getElementById('metodo-pag').value}%0A%0A_Aguardando atendente para despacho._`;
+            
+            // Link do seu Bot de Vendas
+            window.open(`https://t.me/SEU_BOT_AQUI?text=${msg}`);
+        }
 
+        // Iniciar
+        renderizar(db_estoque);
+    </script>
 </body>
 </html>
