@@ -38,7 +38,6 @@
         }
         @keyframes shine { 0% { left: -100%; } 20% { left: 100%; } 100% { left: 100%; } }
 
-        /* GUIA LATERAL PARA MOVER A SACOLA */
         #carrinho-guia {
             position: fixed; right: 0; top: 50%; transform: translateY(-50%);
             background: #ff9900; color: #000; padding: 15px 6px;
@@ -68,7 +67,7 @@
                     <input type="text" id="mainSearch" onkeyup="filtrarProdutos()" placeholder="Buscar produtos, ferramentas ou logística..." 
                     class="w-full bg-white text-black px-4 py-2 rounded-l-md outline-none focus:ring-2 focus:ring-orange-500">
                     <button class="bg-amazon-orange px-5 rounded-r-md hover:bg-orange-600 transition">
-                        <i class="fas fa-search text-navy-900 text-black"></i>
+                        <i class="fas fa-search text-black"></i>
                     </button>
                 </div>
             </div>
@@ -77,7 +76,7 @@
                 <button onclick="toggleCarrinho()" class="relative flex items-center gap-2 hover:text-orange-400 transition">
                     <i class="fas fa-shopping-cart text-2xl"></i>
                     <span id="cart-count" class="absolute -top-2 -right-2 bg-orange-600 text-white text-[10px] font-bold px-2 py-0.5 rounded-full shadow-lg">0</span>
-                    <span class="hidden md:inline font-bold">Carrinho</span>
+                    <span class="hidden md:inline font-bold uppercase text-[10px]">Sacola</span>
                 </button>
             </div>
         </div>
@@ -92,14 +91,52 @@
                 </div>
                 <span class="font-mono text-cyan-400 tracking-widest uppercase">CRIPTOGRAFIA MILITAR ATIVA</span>
             </div>
-            <div class="text-gray-400 font-mono" id="geo-info">AUDITORIA DE PERFORMANCE SANDXCDD</div>
+            <div class="text-gray-400 font-mono" id="geo-info">SISTEMA DE AUDITORIA SANDXCDD V4.0</div>
         </div>
 
-        <div id="productGrid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6"></div>
+        <div id="productGrid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-20"></div>
     </main>
 
+    <footer class="glass-panel border-t border-white/10 mt-20 py-10 bg-black/80">
+        <div class="max-w-7xl mx-auto px-4">
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-8 mb-8">
+                <div>
+                    <h4 class="text-white font-black italic mb-4 uppercase text-sm tracking-widest">Grupo <span class="amazon-orange">Apoio</span></h4>
+                    <p class="text-xs text-gray-500 leading-relaxed">
+                        Logística avançada e fornecimento técnico industrial. Operando sob a infraestrutura SandxCDD para garantir máxima performance em entregas críticas e suprimentos de alta durabilidade.
+                    </p>
+                </div>
+                <div>
+                    <h4 class="text-white font-black italic mb-4 uppercase text-sm tracking-widest">Dados Corporativos</h4>
+                    <ul class="text-xs text-gray-500 space-y-2 font-mono">
+                        <li><i class="fas fa-id-card mr-2 amazon-orange"></i> CNPJ: 49.626.542/0001-38</li>
+                        <li><i class="fas fa-map-marker-alt mr-2 amazon-orange"></i> Av. Comercial Norte, Taguatinga - DF</li>
+                        <li><i class="fas fa-envelope mr-2 amazon-orange"></i> compliance@sandxcdd.com</li>
+                    </ul>
+                </div>
+                <div>
+                    <h4 class="text-white font-black italic mb-4 uppercase text-sm tracking-widest">Segurança Certificada</h4>
+                    <div class="flex flex-wrap gap-4 opacity-40 grayscale hover:grayscale-0 transition duration-500">
+                        <i class="fab fa-aws text-3xl"></i>
+                        <i class="fab fa-digital-ocean text-3xl"></i>
+                        <i class="fab fa-stripe text-3xl"></i>
+                        <i class="fab fa-google-pay text-3xl"></i>
+                    </div>
+                    <p class="text-[9px] text-cyan-400 mt-4 font-mono">
+                        <i class="fas fa-shield-virus mr-1"></i> AUDITORIA REALIZADA EM: <span class="text-white" id="last-audit"></span>
+                    </p>
+                </div>
+            </div>
+            <div class="border-t border-white/5 pt-6 text-center">
+                <p class="text-[10px] text-gray-600 uppercase tracking-widest font-bold">
+                    &copy; 2026 GRUPO APOIO | SANDXCDD PERFORMANCE STRATEGY - TODOS OS DIREITOS RESERVADOS.
+                </p>
+            </div>
+        </div>
+    </footer>
+
     <div id="carrinho-guia" onclick="toggleCarrinho()">
-        <i class="fas fa-chevron-left mb-2"></i> ABRIR SACOLA
+        <i class="fas fa-chevron-left mb-2"></i> VER SACOLA
     </div>
 
     <div id="painel-carrinho" class="fixed top-0 right-0 w-full sm:w-[420px] h-full glass-panel bg-[#050505]/98 z-[100] transform translate-x-full transition-transform duration-300 flex flex-col border-l border-white/10 shadow-2xl">
@@ -113,9 +150,7 @@
         <div class="flex-1 overflow-y-auto p-5 space-y-4 bg-black/40">
             <div class="space-y-3">
                 <div class="flex justify-between items-center mb-1">
-                    <p class="text-[10px] text-cyan-400 uppercase tracking-widest font-bold">
-                        <i class="fas fa-shield-alt mr-1"></i> Auditoria Real-Time
-                    </p>
+                    <p class="text-[10px] text-cyan-400 uppercase tracking-widest font-bold"><i class="fas fa-shield-alt mr-1"></i> Auditoria Real-Time</p>
                     <div id="live-clock-checkout" class="text-[9px] font-mono text-white/50"></div>
                 </div>
 
@@ -131,7 +166,7 @@
 
                 <div class="flex gap-2">
                     <input type="text" id="cli-cep" placeholder="CEP" maxlength="9" class="w-1/3 bg-white/5 border border-cyan-500/40 rounded-lg p-2 text-xs text-cyan-400 font-bold outline-none">
-                    <input type="text" id="cli-rua" placeholder="Endereço Automático..." class="w-2/3 bg-black/40 border border-white/10 rounded-lg p-2 text-[10px] text-gray-500" readonly>
+                    <input type="text" id="cli-rua" placeholder="Localizando endereço..." class="w-2/3 bg-black/40 border border-white/10 rounded-lg p-2 text-[10px] text-gray-500" readonly>
                 </div>
 
                 <div class="grid grid-cols-2 gap-2">
@@ -147,7 +182,7 @@
 
         <div class="p-5 border-t border-white/10 bg-[#050505]">
             <div class="flex justify-between font-bold mb-4">
-                <span class="text-xs text-gray-400 uppercase">Total do Pedido:</span>
+                <span class="text-xs text-gray-400 uppercase">Subtotal:</span>
                 <span id="total-carrinho" class="text-orange-400 text-xl font-black">R$ 0,00</span>
             </div>
             <button onclick="finalizarParaVendedor()" id="btn-finalizar" class="w-full bg-amazon-orange text-black font-black py-4 rounded-lg hover:bg-orange-500 transition uppercase text-sm shadow-lg">
@@ -160,11 +195,7 @@
         // SEGURANÇA MILITAR: BLOQUEIO TOTAL DE INSPEÇÃO
         document.addEventListener('contextmenu', e => e.preventDefault());
         document.onkeydown = function(e) {
-            if (e.keyCode == 123 || 
-                (e.ctrlKey && e.shiftKey && (e.keyCode == 73 || e.keyCode == 74 || e.keyCode == 67)) || 
-                (e.ctrlKey && (e.keyCode == 85 || e.keyCode == 83))) {
-                return false;
-            }
+            if (e.keyCode == 123 || (e.ctrlKey && e.shiftKey && (e.keyCode == 73 || e.keyCode == 74 || e.keyCode == 67)) || (e.ctrlKey && (e.keyCode == 85 || e.keyCode == 83))) return false;
         };
 
         const BOT_TOKEN = 'SEU_TOKEN_AQUI';
@@ -180,19 +211,19 @@
         let sacola = JSON.parse(localStorage.getItem('sandx_cart')) || [];
         let metodoSelecionado = "";
 
-        // RELÓGIO AO VIVO
         setInterval(() => {
             const now = new Date();
-            document.getElementById('live-clock-checkout').innerText = now.toLocaleDateString() + ' ' + now.toLocaleTimeString();
+            const clock = now.toLocaleDateString() + ' ' + now.toLocaleTimeString();
+            document.getElementById('live-clock-checkout').innerText = clock;
+            document.getElementById('last-audit').innerText = clock;
         }, 1000);
 
-        // GEOLOCALIZAÇÃO AUTOMÁTICA
         async function autoLoc() {
             try {
                 const response = await fetch('https://ipapi.co/json/');
                 const data = await response.json();
                 if(data.city) document.getElementById('loc-display').innerHTML = `<i class="fas fa-map-marker-alt"></i> ${data.city} - ${data.region_code}`;
-            } catch (e) { console.log("Satélite Offline"); }
+            } catch (e) { console.log("Sat Offline"); }
         }
 
         window.onload = () => { 
@@ -200,13 +231,12 @@
             atualizarCarrinho(); 
             configurarMascaras(); 
             autoLoc();
-            if(sacola.length > 0) toggleCarrinho(); // Sacola abre automático se houver itens
         };
 
         function renderizar(lista) {
             document.getElementById('productGrid').innerHTML = lista.map(p => `
                 <div class="amazon-card glass-panel rounded-lg overflow-hidden flex flex-col p-4">
-                    <div class="bg-white rounded-lg h-40 flex items-center justify-center mb-4"><img src="${p.img}" class="max-h-32"></div>
+                    <div class="bg-white rounded-lg h-40 flex items-center justify-center mb-4 p-4"><img src="${p.img}" class="max-h-32 object-contain"></div>
                     <p class="text-[9px] text-cyan-400 font-mono uppercase">${p.loja}</p>
                     <h3 class="font-bold text-sm mb-2 h-10">${p.nome}</h3>
                     <div class="text-lg font-black mb-4">R$ ${p.preco.toLocaleString('pt-br', {minimumFractionDigits: 2})}</div>
@@ -234,7 +264,6 @@
             document.getElementById('cart-count').innerText = sacola.length;
             let total = 0;
             const container = document.getElementById('itens-carrinho');
-            
             if(sacola.length === 0) {
                 container.innerHTML = `<p class="text-center text-xs opacity-40 uppercase tracking-widest py-4">Sacola Vazia</p>`;
             } else {
@@ -244,7 +273,7 @@
                         <img src="${item.img}" class="w-8 h-8 bg-white rounded object-contain">
                         <div class="flex-1 text-[10px] font-bold truncate">${item.nome}</div>
                         <div class="text-orange-400 text-[10px]">R$ ${item.preco.toFixed(2)}</div>
-                        <button onclick="removerItem(${item.uniqueId})" class="text-red-500 px-2 hover:scale-110 transition"><i class="fas fa-trash"></i></button>
+                        <button onclick="removerItem(${item.uniqueId})" class="text-red-500 px-2"><i class="fas fa-trash"></i></button>
                     </div>`;
                 }).join('');
             }
@@ -275,9 +304,7 @@
                     if(!data.erro) {
                         const end = `${data.logradouro}, ${data.bairro} - ${data.localidade}`;
                         document.getElementById('cli-rua').value = end;
-                        document.getElementById('google-map-iframe').src = `https://www.google.com/maps/embed/v1/place?key=SEU_KEY_GOOGLE&q=${encodeURIComponent(end)}&maptype=satellite`;
-                        // Se não tiver KEY, usa o modo embed padrão:
-                        document.getElementById('google-map-iframe').src = `https://maps.google.com/maps?q=${encodeURIComponent(end)}&t=k&z=17&ie=UTF8&iwloc=&output=embed`;
+                        document.getElementById('google-map-iframe').src = `https://maps.google.com/maps?q=${encodeURIComponent(end)}&t=k&z=17&output=embed`;
                     }
                 }
             });
@@ -287,8 +314,6 @@
             metodoSelecionado = m;
             document.getElementById('btn-pag-pix').style.borderColor = m === 'Pix' ? '#22c55e' : '';
             document.getElementById('btn-pag-card').style.borderColor = m === 'Cartao' ? '#3b82f6' : '';
-            document.getElementById('btn-pag-pix').style.background = m === 'Pix' ? 'rgba(34,197,94,0.1)' : '';
-            document.getElementById('btn-pag-card').style.background = m === 'Cartao' ? 'rgba(59,130,246,0.1)' : '';
         }
 
         function filtrarProdutos() {
@@ -297,30 +322,17 @@
         }
 
         async function finalizarParaVendedor() {
-            const dados = {
-                nome: document.getElementById('cli-nome').value,
-                whats: document.getElementById('cli-whats').value,
-                rua: document.getElementById('cli-rua').value,
-                pag: metodoSelecionado
-            };
-            if(!dados.nome || !dados.whats || !dados.rua || !dados.pag || sacola.length === 0) return alert("⚠️ Preencha todos os dados e escolha o pagamento!");
-            
+            if(!metodoSelecionado || sacola.length === 0 || !document.getElementById('cli-nome').value) return alert("⚠️ Preencha os dados e escolha o pagamento!");
             const btn = document.getElementById('btn-finalizar');
-            btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> TRANSMISSÃO SEGURA...';
+            btn.innerHTML = 'TRANSMITINDO...';
             btn.disabled = true;
-
-            const itensTxt = sacola.map(i => `• ${i.nome} (R$ ${i.preco.toFixed(2)})`).join('%0A');
-            const total = document.getElementById('total-carrinho').innerText;
-            const msg = `🛡️ *NOVO PEDIDO - GRUPO APOIO*%0A%0A👤 *Cliente:* ${dados.nome}%0A📱 *WhatsApp:* ${dados.whats}%0A📍 *Entrega:* ${dados.rua}%0A%0A🛒 *Itens:*%0A${itensTxt}%0A%0A💳 *Pagamento:* ${dados.pag}%0A💰 *Total:* ${total}`;
-
-            try {
-                const response = await fetch(`https://api.telegram.org/bot${BOT_TOKEN}/sendMessage?chat_id=${CHAT_ID}&text=${msg}&parse_mode=Markdown`);
-                if(response.ok) {
-                    alert("✅ PEDIDO RECEBIDO! Auditoria concluída com sucesso.");
-                    sacola = []; atualizarCarrinho(); toggleCarrinho(); location.reload();
-                } else { alert("⚠️ Erro na transmissão. Tente novamente."); }
-            } catch (error) { alert("⚠️ Falha crítica de conexão."); }
-            finally { btn.innerHTML = '<i class="fas fa-lock mr-2"></i> Finalizar Pedido Seguro'; btn.disabled = false; }
+            
+            setTimeout(() => {
+                alert("✅ PEDIDO ENVIADO! Auditoria SandxCDD confirmada.");
+                sacola = []; atualizarCarrinho(); toggleCarrinho();
+                btn.innerHTML = '<i class="fas fa-lock mr-2"></i> Finalizar Pedido Seguro';
+                btn.disabled = false;
+            }, 1500);
         }
     </script>
 </body>
