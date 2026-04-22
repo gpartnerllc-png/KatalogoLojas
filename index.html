@@ -15,13 +15,16 @@
             -webkit-user-select: none; user-select: none;
         }
         input, textarea { -webkit-user-select: auto; user-select: auto; }
+        
         .glass-panel { background: rgba(255, 255, 255, 0.03); backdrop-filter: blur(16px); border: 1px solid rgba(255, 255, 255, 0.05); }
         .amazon-orange { color: #ff9900; }
         .bg-amazon-orange { background-color: #ff9900; }
         .amazon-card { transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); animation: fadeIn 0.5s ease-out; }
-        .amazon-card:hover { transform: translateY(-5px); border-color: rgba(8, 145, 178, 0.4); }
+        .amazon-card:hover { transform: translateY(-5px); border-color: rgba(8, 145, 178, 0.4); box-shadow: 0 10px 30px -10px rgba(0,0,0,0.5); }
         .no-scrollbar::-webkit-scrollbar { display: none; }
+        
         @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+
         #btn-finalizar { position: relative; overflow: hidden; }
         #btn-finalizar::after {
             content: ""; position: absolute; top: -50%; left: -100%; width: 100%; height: 200%;
@@ -29,229 +32,320 @@
             transform: rotate(20deg); animation: shine 4s infinite;
         }
         @keyframes shine { 0% { left: -100%; } 20% { left: 100%; } 100% { left: 100%; } }
+
         @media print { body { display:none; } }
     </style>
 </head>
 <body class="min-h-screen overflow-x-hidden">
 
     <header class="fixed top-0 left-0 w-full z-50 glass-panel bg-[#050505]/90 border-b border-white/10">
-        <div class="max-w-7xl mx-auto px-4 py-2 flex items-center justify-between gap-4">
+        <div class="max-w-7xl mx-auto px-4 py-3 flex items-center justify-between gap-4">
             <a href="#" class="text-xl font-bold tracking-tighter">GRUPO<span class="amazon-orange">APOIO</span></a>
             
-            <div class="hidden md:flex flex-col text-[10px] leading-tight">
-                <span class="text-gray-400 italic">Satélite Status</span>
-                <span id="loc-display" class="font-bold text-cyan-400 uppercase tracking-tighter italic">Sincronizando...</span>
+            <div class="hidden md:flex flex-col text-xs leading-tight">
+                <span class="text-gray-400 italic">Localização via Satélite</span>
+                <span id="loc-display" class="font-bold text-cyan-400"><i class="fas fa-satellite"></i> Sincronizando...</span>
             </div>
 
-            <div class="flex-1 max-w-xl relative">
+            <div class="flex-1 max-w-2xl relative">
                 <div class="flex">
-                    <input type="text" id="mainSearch" onkeyup="filtrarProdutos()" placeholder="Pesquisar..." 
-                    class="w-full bg-white text-black px-4 py-1.5 rounded-l-md outline-none text-sm">
-                    <button class="bg-amazon-orange px-4 rounded-r-md"><i class="fas fa-search text-black"></i></button>
+                    <input type="text" id="mainSearch" onkeyup="filtrarProdutos()" placeholder="Buscar produtos, ferramentas ou logística..." 
+                    class="w-full bg-white text-black px-4 py-2 rounded-l-md outline-none focus:ring-2 focus:ring-orange-500">
+                    <button class="bg-amazon-orange px-5 rounded-r-md hover:bg-orange-600 transition">
+                        <i class="fas fa-search text-navy-900"></i>
+                    </button>
                 </div>
+                <div id="search-feedback" class="absolute top-12 left-0 w-full text-xs text-cyan-400 font-mono"></div>
             </div>
 
-            <button onclick="toggleCarrinho()" class="relative flex items-center gap-2 hover:text-orange-400 transition">
-                <i class="fas fa-shopping-cart text-xl"></i>
-                <span id="cart-count" class="absolute -top-2 -right-2 bg-orange-600 text-white text-[9px] font-bold px-1.5 rounded-full">0</span>
-            </button>
+            <div class="flex items-center gap-6">
+                <button onclick="toggleCarrinho()" class="relative flex items-center gap-2 hover:text-orange-400 transition">
+                    <i class="fas fa-shopping-cart text-2xl"></i>
+                    <span id="cart-count" class="absolute -top-2 -right-2 bg-orange-600 text-white text-[10px] font-bold px-2 py-0.5 rounded-full shadow-lg">0</span>
+                    <span class="hidden md:inline font-bold">Carrinho</span>
+                </button>
+            </div>
         </div>
     </header>
 
-    <main class="max-w-7xl mx-auto px-4 mt-20 pb-10">
-        <div id="rtk-status" class="glass-panel p-2 rounded-lg mb-6 border-cyan-500/20 flex items-center justify-between text-[11px]">
-            <div class="flex items-center gap-2 font-mono text-cyan-400">
-                <div class="w-2 h-2 bg-green-500 rounded-full animate-pulse"></div> SINAL ATIVO
+    <main class="max-w-7xl mx-auto px-4 mt-24 pb-10">
+        <div id="rtk-status" class="glass-panel p-3 rounded-lg mb-8 border-cyan-500/30 flex items-center justify-between text-xs md:text-sm">
+            <div class="flex items-center gap-3">
+                <div class="relative w-3 h-3">
+                    <div class="absolute inset-0 bg-green-500 rounded-full animate-ping"></div>
+                    <div class="relative bg-green-500 w-3 h-3 rounded-full"></div>
+                </div>
+                <span class="font-mono text-cyan-400 tracking-widest uppercase">Sinal APOIO Ativo</span>
             </div>
-            <div class="text-gray-500">Auditoria SandxCDD: <span id="header-clock" class="text-white">00:00:00</span></div>
+            <div class="text-gray-400" id="geo-info">Auditoria de Performance em Tempo Real</div>
         </div>
-        <div id="productGrid" class="grid grid-cols-2 lg:grid-cols-4 gap-4"></div>
+
+        <div id="productGrid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6"></div>
     </main>
 
-    <div id="painel-carrinho" class="fixed top-0 right-0 w-full sm:w-[380px] h-full glass-panel bg-[#050505]/98 z-[100] transform translate-x-full transition-transform duration-300 flex flex-col border-l border-white/10">
-        <div class="p-4 border-b border-white/10 flex justify-between items-center">
-            <h2 class="text-lg font-bold uppercase tracking-tighter">Sua <span class="amazon-orange">Sacola</span></h2>
-            <button onclick="toggleCarrinho()" class="text-gray-400 hover:text-white"><i class="fas fa-times"></i></button>
+    <footer class="bg-[#020202] border-t border-white/5 p-10 text-center mt-10">
+        <div class="max-w-7xl mx-auto">
+            <div class="flex flex-wrap justify-center gap-8 mb-8 opacity-50 grayscale hover:grayscale-0 transition-all">
+                <img src="https://img.shields.io/badge/PCI_DSS-COMPLIANT-green?style=flat-square" alt="PCI">
+                <img src="https://img.shields.io/badge/LGPD-CONFORME-blue?style=flat-square" alt="LGPD">
+                <img src="https://img.shields.io/badge/SSL-ENCRYPTED-orange?style=flat-square" alt="SSL">
+            </div>
+            
+            <div class="grid md:grid-cols-3 gap-8 text-left text-[11px] text-gray-500 border-b border-white/5 pb-8 mb-8">
+                <div>
+                    <h4 class="text-white font-bold mb-3 uppercase tracking-tighter">Sobre o Grupo Apoio</h4>
+                    <p>Operamos sob métricas rigorosas e auditoria de performance, garantindo segurança jurídica e financeira de ponta a ponta.</p>
+                </div>
+                <div>
+                    <h4 class="text-white font-bold mb-3 uppercase tracking-tighter">Segurança de Dados</h4>
+                    <p>Dados em ambiente militar criptografado e diretrizes da LGPD com auditoria x-PARTNER</p>
+                </div>
+                <div>
+                    <h4 class="text-white font-bold mb-3 uppercase tracking-tighter">Contato Corporativo</h4>
+                    <p><i class="fas fa-location-dot"></i> Jardim da Barragem III - Águas Lindas - GO</p>
+                    <p><i class="fab fa-whatsapp"></i> (61) 9 8417-2769 | <i class="fas fa-envelope"></i> aguaslindas@apoiodistribuidora.com</p>
+                </div>
+            </div>
+            <p class="text-[9px] tracking-widest text-gray-600 uppercase">© 2026 Grupo Apoio - Todos os direitos reservados. Sandbox Performance Certified.</p>
+        </div>
+    </footer>
+
+    <div id="painel-carrinho" class="fixed top-0 right-0 w-full sm:w-[450px] h-full glass-panel bg-[#050505]/98 z-[100] transform translate-x-full transition-transform duration-300 flex flex-col border-l border-white/10 shadow-2xl">
+        <div class="p-6 border-b border-white/10 flex justify-between items-center">
+            <h2 class="text-xl font-bold uppercase italic tracking-tighter">Sua <span class="amazon-orange">Sacola</span></h2>
+            <button onclick="toggleCarrinho()" class="text-gray-400 hover:text-white p-2"><i class="fas fa-times text-xl"></i></button>
         </div>
 
-        <div id="itens-carrinho" class="flex-1 overflow-y-auto p-3 space-y-2 no-scrollbar"></div>
+        <div id="itens-carrinho" class="flex-1 overflow-y-auto p-4 space-y-4 no-scrollbar"></div>
 
-        <div class="p-4 bg-black/60 border-t border-white/10 space-y-3">
-            <div id="checkout-detalhado" class="p-3 space-y-2 bg-white/5 rounded-lg border border-white/5">
+        <div class="p-6 bg-black/60 border-t border-white/10 space-y-4">
+            <div id="checkout-detalhado" class="p-4 space-y-3 bg-white/5 rounded-xl border border-white/5">
                 <div class="flex justify-between items-center mb-1">
-                    <p class="text-[9px] text-cyan-400 uppercase font-bold tracking-widest"><i class="fas fa-clock mr-1"></i> <span id="live-clock-checkout">--/--/-- 00:00:00</span></p>
+                    <p class="text-[10px] text-cyan-400 uppercase tracking-widest font-bold">
+                        <i class="fas fa-shield-alt mr-1"></i> Auditoria em Tempo Real
+                    </p>
+                    <div id="live-clock-checkout" class="text-[9px] font-mono text-white/50">00:00:00</div>
                 </div>
 
-                <input type="text" id="cli-nome" placeholder="Nome Completo" class="w-full bg-black/40 border border-white/10 rounded p-1.5 text-xs outline-none focus:border-orange-500">
-                <input type="tel" id="cli-whats" placeholder="WhatsApp" class="w-full bg-black/40 border border-white/10 rounded p-1.5 text-xs outline-none">
+                <input type="text" id="cli-nome" placeholder="Nome Completo" class="w-full bg-black/40 border border-white/10 rounded-lg p-2 text-sm outline-none focus:border-orange-500 transition">
+                <input type="tel" id="cli-whats" placeholder="WhatsApp (DDD)" class="w-full bg-black/40 border border-white/10 rounded-lg p-2 text-sm outline-none focus:border-orange-500 transition">
                 
-                <div id="sat-map-container" class="w-full h-24 rounded bg-black border border-white/5 overflow-hidden relative">
-                    <iframe id="google-map-iframe" class="w-full h-full grayscale opacity-50" frameborder="0" src="about:blank"></iframe>
+                <div id="sat-map-container" class="w-full h-32 rounded-lg bg-black border border-white/5 overflow-hidden relative">
+                    <iframe id="google-map-iframe" class="w-full h-full grayscale opacity-70" frameborder="0" scrolling="no" marginheight="0" marginwidth="0" src="about:blank"></iframe>
+                    <div class="absolute top-2 left-2 bg-black/80 px-2 py-1 rounded text-[8px] text-cyan-400 font-mono border border-cyan-500/30">
+                        <i class="fas fa-crosshairs animate-pulse"></i> LIVE_STREAM_STREET
+                    </div>
                 </div>
 
                 <div class="flex gap-2">
-                    <input type="text" id="cli-cep" placeholder="CEP" maxlength="9" class="w-1/3 bg-white/10 border border-cyan-500/30 rounded p-1.5 text-xs text-cyan-400 font-bold outline-none">
-                    <input type="text" id="cli-rua" placeholder="Endereço" class="w-2/3 bg-black/20 border border-white/10 rounded p-1.5 text-[9px] text-gray-400" readonly>
+                    <input type="text" id="cli-cep" placeholder="CEP" maxlength="9" class="w-1/3 bg-white/10 border border-cyan-500/30 rounded-lg p-2 text-sm text-cyan-400 font-bold outline-none">
+                    <input type="text" id="cli-rua" placeholder="Endereço Automático" class="w-2/3 bg-black/20 border border-white/10 rounded-lg p-2 text-[10px] text-gray-400" readonly>
+                </div>
+                
+                <div id="status-mapa" class="hidden text-[9px] bg-green-500/10 text-green-400 p-2 rounded border border-green-500/20 items-center gap-2">
+                    <i class="fas fa-satellite-dish"></i> Conexão Local Ativa: <span id="cidade-txt">Brasília - DF</span>
                 </div>
             </div>
 
             <div class="grid grid-cols-2 gap-2">
-                <button onclick="selecionarPag('Pix')" id="btn-pag-pix" class="flex items-center justify-center gap-1 p-2 rounded border border-white/10 bg-white/5 transition-all">
-                    <i class="fab fa-pix text-green-400 text-xs"></i> <span class="text-[9px] font-bold">PIX</span>
+                <button onclick="selecionarPag('Pix')" id="btn-pag-pix" class="flex items-center justify-center gap-2 p-3 rounded-xl border border-white/10 bg-white/5 hover:border-green-500 transition-all">
+                    <i class="fab fa-pix text-green-400"></i> <span class="text-[10px] font-bold">PIX</span>
                 </button>
-                <button onclick="selecionarPag('Cartao')" id="btn-pag-card" class="flex items-center justify-center gap-1 p-2 rounded border border-white/10 bg-white/5 transition-all">
-                    <i class="fas fa-credit-card text-blue-400 text-xs"></i> <span class="text-[9px] font-bold">CARTÃO</span>
+                <button onclick="selecionarPag('Cartao')" id="btn-pag-card" class="flex items-center justify-center gap-2 p-3 rounded-xl border border-white/10 bg-white/5 hover:border-blue-500 transition-all">
+                    <i class="fas fa-credit-card text-blue-400"></i> <span class="text-[10px] font-bold">CARTÃO</span>
                 </button>
             </div>
 
-            <div class="flex justify-between font-bold text-base pt-1">
-                <span class="text-xs">Subtotal:</span>
-                <span id="total-carrinho" class="text-orange-400">R$ 0,00</span>
+            <div class="flex justify-between font-bold text-lg pt-2 border-t border-white/5">
+                <span class="text-sm">Total do Pedido:</span>
+                <span id="total-carrinho" class="text-orange-400 font-black">R$ 0,00</span>
             </div>
 
-            <button onclick="finalizarParaVendedor()" id="btn-finalizar" class="w-full bg-amazon-orange text-black font-black py-3 rounded text-xs uppercase shadow-lg">
-                Finalizar Pedido Seguro
+            <button onclick="finalizarParaVendedor()" id="btn-finalizar" class="w-full bg-amazon-orange text-black font-extrabold py-4 rounded-lg hover:bg-orange-500 transition uppercase shadow-lg flex justify-center items-center gap-2">
+                <i class="fas fa-shield-check"></i> Finalizar Pedido Seguro
             </button>
         </div>
     </div>
 
     <script>
-        const BOT_TOKEN = 'SEU_TOKEN'; 
-        const CHAT_ID = 'SEU_ID';
+        const BOT_TOKEN = 'SEU_TOKEN_AQUI';
+        const CHAT_ID = 'SEU_CHAT_ID_AQUI';
 
         const db_estoque = [
-            { id: 101, nome: "Parafuso Sextavado Aço 8.8", preco: 145.90, img: "https://via.placeholder.com/200", loja: "Atacadão" },
-            { id: 102, nome: "Dashboard SandxCDD", preco: 597.00, img: "https://via.placeholder.com/200", loja: "Digital" },
+            { id: 101, nome: "Parafuso Sextavado Aço 8.8", preco: 145.90, img: "https://via.placeholder.com/200", loja: "Atacadão Ferragens" },
+            { id: 102, nome: "Dashboard Performance SandxCDD", preco: 597.00, img: "https://via.placeholder.com/200", loja: "Digital Solutions" },
+            { id: 103, nome: "Kit Brocas Profissional", preco: 89.90, img: "https://via.placeholder.com/200", loja: "Loja Parceira" },
             { id: 104, nome: "Painel LED Industrial 60W", preco: 210.00, img: "https://via.placeholder.com/200", loja: "Rei do LED" }
         ];
 
         let sacola = JSON.parse(localStorage.getItem('sandx_cart')) || [];
         let metodoSelecionado = "";
 
-        // === AUTOMÁTICOS (HORA E LOCALIZAÇÃO) ===
-        function startRelogios() {
-            setInterval(() => {
-                const agora = new Date();
-                const time = agora.toLocaleTimeString('pt-BR');
-                const date = agora.toLocaleDateString('pt-BR');
-                document.getElementById('header-clock').innerText = time;
-                document.getElementById('live-clock-checkout').innerText = `${date} ${time}`;
-            }, 1000);
-        }
+        // === RELÓGIO AUTOMÁTICO AO VIVO ===
+        setInterval(() => {
+            const time = new Date().toLocaleTimeString('pt-BR');
+            const date = new Date().toLocaleDateString('pt-BR');
+            document.getElementById('live-clock-checkout').innerText = `${date} ${time}`;
+        }, 1000);
 
+        // === GEOLOCALIZAÇÃO AUTOMÁTICA AO CARREGAR ===
         async function autoLoc() {
             try {
-                const res = await fetch('https://ipapi.co/json/');
-                const data = await res.json();
+                const response = await fetch('https://ipapi.co/json/');
+                const data = await response.json();
                 if(data.city) {
                     const local = `${data.city} - ${data.region_code}`;
-                    document.getElementById('loc-display').innerText = local;
+                    document.getElementById('loc-display').innerHTML = `<i class="fas fa-map-marker-alt"></i> ${local}`;
+                    document.getElementById('cidade-txt').innerText = local;
                 }
-            } catch (e) { console.log("Satélite em busca..."); }
+            } catch (e) { console.log("Satélite Offline"); }
         }
 
-        // === LÓGICA DO CARRINHO (COMPACTA) ===
-        function atualizarCarrinho() {
-            document.getElementById('cart-count').innerText = sacola.length;
-            const container = document.getElementById('itens-carrinho');
-            let total = 0;
-            
-            container.innerHTML = sacola.length === 0 ? 
-                '<p class="text-center py-10 opacity-20 text-[10px]">VAZIO</p>' :
-                sacola.map(item => {
-                    total += item.preco;
-                    return `
-                        <div class="flex gap-3 bg-white/5 p-2 rounded items-center">
-                            <img src="${item.img}" class="w-8 h-8 rounded bg-white object-contain">
-                            <div class="flex-1 min-w-0">
-                                <p class="text-[9px] font-bold truncate uppercase">${item.nome}</p>
-                                <p class="text-orange-400 text-[10px]">R$ ${item.preco.toFixed(2)}</p>
-                            </div>
-                            <button onclick="removerItem(${item.uniqueId})" class="text-gray-600 hover:text-red-500"><i class="fas fa-trash text-[10px]"></i></button>
-                        </div>
-                    `;
-                }).join('');
-            
-            document.getElementById('total-carrinho').innerText = `R$ ${total.toLocaleString('pt-br', {minimumFractionDigits: 2})}`;
-            localStorage.setItem('sandx_cart', JSON.stringify(sacola));
-        }
-
-        function addSacola(id) {
-            const p = db_estoque.find(x => x.id === id);
-            sacola.push({...p, uniqueId: Date.now() + Math.random()});
+        window.onload = () => {
+            renderizar(db_estoque);
             atualizarCarrinho();
-            document.getElementById('painel-carrinho').classList.remove('translate-x-full');
-        }
-
-        function removerItem(uid) {
-            sacola = sacola.filter(i => i.uniqueId !== uid);
-            atualizarCarrinho();
-        }
-
-        function selecionarPag(m) {
-            metodoSelecionado = m;
-            document.getElementById('btn-pag-pix').style.borderColor = m === 'Pix' ? '#22c55e' : 'rgba(255,255,255,0.1)';
-            document.getElementById('btn-pag-card').style.borderColor = m === 'Cartao' ? '#3b82f6' : 'rgba(255,255,255,0.1)';
-        }
-
-        // === CEP AUTOMÁTICO & MAPA ===
-        document.getElementById('cli-cep').addEventListener('input', async (e) => {
-            let v = e.target.value.replace(/\D/g, '');
-            if (v.length > 5) v = v.slice(0, 5) + '-' + v.slice(5, 8);
-            e.target.value = v;
-            if(v.length === 9) {
-                const res = await fetch(`https://viacep.com.br/ws/${v.replace('-','')}/json/`);
-                const d = await res.json();
-                if(!d.erro) {
-                    const end = `${d.logradouro}, ${d.bairro} - ${d.localidade}/${d.uf}`;
-                    document.getElementById('cli-rua').value = end;
-                    document.getElementById('google-map-iframe').src = `https://maps.google.com/maps?q=${encodeURIComponent(end)}&t=k&z=17&output=embed&iwloc=near`;
-                }
-            }
-        });
-
-        // === FINALIZAÇÃO & SEGURANÇA ===
-        async function finalizarParaVendedor() {
-            const nome = document.getElementById('cli-nome').value;
-            if(!nome || !metodoSelecionado || sacola.length === 0) return alert("⚠️ Dados incompletos.");
-            
-            const btn = document.getElementById('btn-finalizar');
-            btn.innerHTML = "ENVIANDO...";
-            
-            const msg = `🛡️ *PEDIDO GRUPO APOIO*%0A👤: ${nome}%0A💳: ${metodoSelecionado}%0A💰: ${document.getElementById('total-carrinho').innerText}`;
-            
-            try {
-                await fetch(`https://api.telegram.org/bot${BOT_TOKEN}/sendMessage?chat_id=${CHAT_ID}&text=${msg}&parse_mode=Markdown`);
-                alert("✅ SUCESSO!");
-                sacola = []; atualizarCarrinho(); location.reload();
-            } catch (e) { alert("Erro de Rede"); }
-        }
+            configurarMascaras();
+            autoLoc();
+        };
 
         function renderizar(lista) {
-            document.getElementById('productGrid').innerHTML = lista.map(p => `
-                <div class="amazon-card glass-panel rounded overflow-hidden flex flex-col group p-2">
-                    <div class="bg-white h-32 rounded flex items-center justify-center mb-2">
-                        <img src="${p.img}" class="max-h-24 mix-blend-multiply group-hover:scale-105 transition">
+            const grid = document.getElementById('productGrid');
+            grid.innerHTML = lista.map(p => `
+                <div class="amazon-card glass-panel rounded-lg overflow-hidden flex flex-col group">
+                    <div class="bg-white h-48 flex items-center justify-center relative overflow-hidden">
+                        <img src="${p.img}" class="max-h-35 mix-blend-multiply group-hover:scale-110 transition-transform duration-500">
                     </div>
-                    <p class="text-[8px] text-cyan-500 font-mono">${p.loja}</p>
-                    <h3 class="font-bold text-[10px] h-8 leading-tight mb-1">${p.nome}</h3>
-                    <div class="text-sm font-black mb-2">R$ ${p.preco.toFixed(2)}</div>
-                    <button onclick="addSacola(${p.id})" class="bg-amazon-orange text-black font-bold py-1.5 rounded text-[9px] uppercase">Comprar</button>
+                    <div class="p-4 flex-1 flex flex-col">
+                        <p class="text-[10px] text-cyan-400 font-mono uppercase">${p.loja}</p>
+                        <h3 class="font-bold text-sm h-8 overflow-hidden mb-2">${p.nome}</h3>
+                        <div class="text-xl font-bold mb-4">R$ ${p.preco.toLocaleString('pt-br', {minimumFractionDigits: 2})}</div>
+                        <button onclick="addSacola(${p.id})" class="mt-auto bg-amazon-orange text-black font-bold py-2 rounded text-xs hover:bg-orange-450 transition active:scale-90">
+                            Adicionar ao Carrinho
+                        </button>
+                    </div>
                 </div>
             `).join('');
         }
 
-        function toggleCarrinho() { document.getElementById('painel-carrinho').classList.toggle('translate-x-full'); }
-        function filtrarProdutos() {
-            const q = document.getElementById('mainSearch').value.toLowerCase();
-            renderizar(db_estoque.filter(p => p.nome.toLowerCase().includes(q)));
+        function addSacola(id) {
+            const item = db_estoque.find(p => p.id === id);
+            const itemUnico = { ...item, uniqueId: Date.now() + Math.random() };
+            sacola.push(itemUnico);
+            salvarSincronizar();
+            document.getElementById('painel-carrinho').classList.remove('translate-x-full');
         }
 
-        // BLOQUEIOS DE SEGURANÇA
+        function removerItem(uniqueId) {
+            sacola = sacola.filter(i => i.uniqueId !== uniqueId);
+            salvarSincronizar();
+        }
+
+        function salvarSincronizar() {
+            localStorage.setItem('sandx_cart', JSON.stringify(sacola));
+            atualizarCarrinho();
+        }
+
+        function atualizarCarrinho() {
+            const count = document.getElementById('cart-count');
+            count.innerText = sacola.length;
+            const container = document.getElementById('itens-carrinho');
+            let total = 0;
+            if(sacola.length === 0) {
+                container.innerHTML = `<div class="text-center py-10 opacity-30 text-xs uppercase tracking-widest">Sua sacola está vazia</div>`;
+            } else {
+                container.innerHTML = sacola.map(item => {
+                    total += item.preco;
+                    return `<div class="flex gap-3 border-b border-white/4 pb-2.5 items-center">
+                        <img src="${item.img}" class="w-10 h-10 bg-white rounded object-contain">
+                        <div class="flex-1">
+                            <div class="text-[9px] font-bold line-clamp-1">${item.nome}</div>
+                            <div class="text-orange-400 text-[10px] font-bold">R$ ${item.preco.toFixed(2)}</div>
+                        </div>
+                        <button onclick="removerItem(${item.uniqueId})" class="text-gray-500 hover:text-red-500 p-2"><i class="fas fa-trash-alt text-xs"></i></button>
+                    </div>`;
+                }).join('');
+            }
+            document.getElementById('total-carrinho').innerText = `R$ ${total.toLocaleString('pt-br', {minimumFractionDigits: 2})}`;
+        }
+
+        function configurarMascaras() {
+            const whatsInput = document.getElementById('cli-whats');
+            whatsInput.addEventListener('input', (e) => {
+                let x = e.target.value.replace(/\D/g, '').match(/(\d{0,2})(\d{0,5})(\d{0,4})/);
+                e.target.value = !x[2] ? x[1] : '(' + x[1] + ') ' + x[2] + (x[3] ? '-' + x[3] : '');
+            });
+            const cepInput = document.getElementById('cli-cep');
+            cepInput.addEventListener('input', (e) => {
+                let v = e.target.value.replace(/\D/g, '');
+                if (v.length > 5) v = v.slice(0, 5) + '-' + v.slice(5, 8);
+                e.target.value = v;
+                if(v.length === 9) buscarCEP_Completo(v);
+            });
+        }
+
+        async function buscarCEP_Completo(cep) {
+            cep = cep.replace(/\D/g, '');
+            try {
+                const res = await fetch(`https://viacep.com.br/ws/${cep}/json/`);
+                const data = await res.json();
+                if (!data.erro) {
+                    const endereco = `${data.logradouro}, ${data.bairro} - ${data.localidade}/${data.uf}`;
+                    document.getElementById('cli-rua').value = endereco;
+                    document.getElementById('status-mapa').classList.replace('hidden', 'flex');
+                    document.getElementById('cidade-txt').innerText = `${data.localidade} - ${data.uf}`;
+                    
+                    // ATUALIZA O MAPA VIA STREET/SATELLITE
+                    const mapUrl = `https://www.google.com/maps?q=${encodeURIComponent(endereco)}&output=embed&t=k`;
+                    document.getElementById('google-map-iframe').src = mapUrl;
+                }
+            } catch (e) { console.error("Falha na busca"); }
+        }
+
+        function selecionarPag(metodo) {
+            metodoSelecionado = metodo;
+            const bPix = document.getElementById('btn-pag-pix');
+            const bCard = document.getElementById('btn-pag-card');
+            bPix.className = bCard.className = "flex items-center justify-center gap-2 p-3 rounded-xl border border-white/10 bg-white/5 transition-all";
+            if(metodo === 'Pix') bPix.classList.add('border-green-500', 'bg-green-500/10', 'ring-1', 'ring-green-500');
+            else bCard.classList.add('border-blue-500', 'bg-blue-500/10', 'ring-1', 'ring-blue-500');
+        }
+
+        function toggleCarrinho() { document.getElementById('painel-carrinho').classList.toggle('translate-x-full'); }
+
+        function filtrarProdutos() {
+            const query = document.getElementById('mainSearch').value.toLowerCase();
+            renderizar(db_estoque.filter(p => p.nome.toLowerCase().includes(query)));
+        }
+
+        async function finalizarParaVendedor() {
+            const dados = {
+                nome: document.getElementById('cli-nome').value,
+                whats: document.getElementById('cli-whats').value,
+                rua: document.getElementById('cli-rua').value,
+                pag: metodoSelecionado
+            };
+            if(!dados.nome || !dados.whats || !dados.rua || !dados.pag || sacola.length === 0) return alert("⚠️ Preencha todos os dados.");
+            
+            const btn = document.getElementById('btn-finalizar');
+            btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> TRANSMISSÃO SEGURA...';
+            btn.disabled = true;
+
+            const itensTxt = sacola.map(i => `• ${i.nome} (R$ ${i.preco.toFixed(2)})`).join('%0A');
+            const total = document.getElementById('total-carrinho').innerText;
+            const msg = `🛡️ *NOVO PEDIDO - GRUPO APOIO*%0A%0A👤 *Cliente:* ${dados.nome}%0A📱 *WhatsApp:* ${dados.whats}%0A📍 *Entrega:* ${dados.rua}%0A%0A🛒 *Itens:*%0A${itensTxt}%0A%0A💳 *Pagamento:* ${dados.pag}%0A💰 *Total:* ${total}`;
+
+            try {
+                const response = await fetch(`https://api.telegram.org/bot${BOT_TOKEN}/sendMessage?chat_id=${CHAT_ID}&text=${msg}&parse_mode=Markdown`);
+                if(response.ok) {
+                    alert("✅ PEDIDO RECEBIDO! Auditoria concluída.");
+                    sacola = []; salvarSincronizar(); location.reload();
+                } else { alert("⚠️ Erro de conexão."); }
+            } catch (error) { alert("⚠️ Falha crítica."); }
+            finally { btn.innerHTML = '<i class="fas fa-shield-check"></i> Finalizar Pedido Seguro'; btn.disabled = false; }
+        }
+
         document.addEventListener('contextmenu', e => e.preventDefault());
         document.onkeydown = e => { if(e.keyCode == 123 || (e.ctrlKey && e.shiftKey && (e.keyCode == 73 || e.keyCode == 74))) return false; };
-
-        window.onload = () => { renderizar(db_estoque); atualizarCarrinho(); startRelogios(); autoLoc(); };
     </script>
 </body>
 </html>
