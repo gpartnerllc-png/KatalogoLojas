@@ -3,121 +3,175 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Grupo | APOIO</title>
-    <link href="https://fonts.googleapis.com/css2?family=Amazon+Ember:wght@400;700&display=swap" rel="stylesheet">
+    <title>Grupo APOIO | Marketplace Inteligente</title>
     <style>
         :root {
             --amazon-navy: #131921;
-            --amazon-light-navy: #232f3e;
-            --amazon-orange: #febd69;
-            --amazon-button: #ffd814;
-            --amazon-button-hover: #f7ca00;
+            --amazon-orange: #ff9900;
             --bg-gray: #eaeded;
+            --white: #ffffff;
         }
 
-        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Arial', sans-serif; }
-
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
         body { background-color: var(--bg-gray); color: #0f1111; }
 
-        /* HEADER AMAZON STYLE */
-        header { background-color: var(--amazon-navy); color: white; padding: 10px 20px; }
+        /* HEADER & SEARCH */
+        header { background-color: var(--amazon-navy); color: white; padding: 10px 0; position: sticky; top: 0; z-index: 1000; }
+        .nav-container { max-width: 1500px; margin: 0 auto; display: flex; align-items: center; gap: 20px; padding: 0 20px; }
         
-        .nav-main { display: flex; align-items: center; justify-content: space-between; max-width: 1500px; margin: 0 auto; }
-
-        .logo { font-size: 1.5rem; font-weight: bold; color: white; text-decoration: none; padding: 10px; border: 1px solid transparent; }
+        .logo { font-size: 1.5rem; font-weight: bold; color: white; text-decoration: none; }
         .logo span { color: var(--amazon-orange); }
 
-        .search-bar { flex-grow: 1; display: flex; margin: 0 20px; height: 40px; }
-        .search-bar input { flex-grow: 1; border: none; border-radius: 4px 0 0 4px; padding: 0 10px; font-size: 1rem; }
-        .search-bar button { background-color: var(--amazon-orange); border: none; width: 45px; border-radius: 0 4px 4px 0; cursor: pointer; }
+        .search-wrapper { flex-grow: 1; display: flex; height: 40px; position: relative; }
+        .search-wrapper input { flex-grow: 1; border: none; border-radius: 4px 0 0 4px; padding: 0 15px; font-size: 1rem; }
+        .search-wrapper button { background-color: var(--amazon-orange); border: none; width: 50px; border-radius: 0 4px 4px 0; cursor: pointer; font-size: 1.2rem; }
 
-        /* GRID DE PRODUTOS */
-        .container { max-width: 1500px; margin: 20px auto; padding: 0 15px; display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 20px; }
-
-        .product-card { background: white; padding: 20px; border-radius: 2px; display: flex; flex-direction: column; justify-content: space-between; }
+        /* CATALOGO & CARDS */
+        .main-content { max-width: 1500px; margin: 20px auto; padding: 0 20px; display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 20px; }
         
-        .product-card h2 { font-size: 1.3rem; margin-bottom: 10px; color: #0f1111; }
+        .product-card { background: var(--white); padding: 20px; border-radius: 4px; display: flex; flex-direction: column; transition: 0.3s; }
+        .product-card:hover { transform: translateY(-5px); box-shadow: 0 5px 15px rgba(0,0,0,0.1); }
+        
+        .product-title { font-size: 1.1rem; font-weight: bold; margin-bottom: 15px; height: 50px; overflow: hidden; }
+        .img-placeholder { width: 100%; height: 200px; background: #f0f0f0; border-radius: 4px; margin-bottom: 15px; display: flex; align-items: center; justify-content: center; color: #999; }
+        
+        .price-container { font-size: 1.5rem; font-weight: bold; margin-bottom: 15px; }
+        .price-container small { font-size: 0.8rem; vertical-align: top; }
 
-        .image-box { width: 100%; height: 200px; background: #f7f7f7; display: flex; align-items: center; justify-content: center; margin-bottom: 15px; }
-        .image-box img { max-width: 100%; max-height: 100%; mix-blend-mode: multiply; }
+        .btn-add { background-color: #ffd814; border: 1px solid #fcd200; border-radius: 20px; padding: 10px; cursor: pointer; font-weight: 600; }
+        .btn-add:hover { background-color: #f7ca00; }
 
-        .price-tag { font-size: 0.8rem; margin-bottom: 10px; }
-        .price-tag b { font-size: 1.8rem; }
-        .price-tag sup { font-size: 0.9rem; top: -0.5em; }
+        /* SACOLA DE COMPRAS (MODAL) */
+        #cart-sidebar { position: fixed; right: -400px; top: 0; width: 350px; height: 100%; background: white; box-shadow: -5px 0 15px rgba(0,0,0,0.2); z-index: 2000; transition: 0.4s; padding: 20px; display: flex; flex-direction: column; }
+        #cart-sidebar.active { right: 0; }
+        .cart-header { display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #ddd; padding-bottom: 10px; }
+        .cart-items { flex-grow: 1; overflow-y: auto; margin-top: 20px; }
+        .cart-footer { border-top: 1px solid #ddd; padding-top: 20px; }
 
-        .btn-amazon {
-            background-color: var(--amazon-button);
-            border: 1px solid #fcd200;
-            border-radius: 20px;
-            padding: 8px;
-            cursor: pointer;
-            width: 100%;
-            font-size: 0.9rem;
-            box-shadow: 0 2px 5px rgba(213,217,217,.5);
-        }
-
-        .btn-amazon:hover { background-color: var(--amazon-button-hover); }
-
-        /* FOOTER */
-        footer { background-color: var(--amazon-light-navy); color: white; text-align: center; padding: 40px 0; margin-top: 50px; }
+        /* FORMULÁRIO DE CADASTRO */
+        .checkout-form input { width: 100%; padding: 10px; margin-bottom: 10px; border: 1px solid #ddd; border-radius: 4px; }
+        
+        .btn-telegram { background-color: #0088cc; color: white; width: 100%; padding: 12px; border: none; border-radius: 4px; cursor: pointer; font-weight: bold; }
     </style>
 </head>
 <body>
 
 <header>
-    <div class="nav-main">
+    <div class="nav-container">
         <a href="#" class="logo">Grupo<span>APOIO</span></a>
-        <div class="search-bar">
-            <input type="text" placeholder="Pesquisar produtos e serviços de performance...">
+        <div class="search-wrapper">
+            <input type="text" id="searchInput" placeholder="Busque por parafusos, ferramentas, códigos..." onkeyup="filtrarProdutos()">
             <button>🔍</button>
         </div>
-        <div style="font-size: 0.8rem; padding: 10px;">
-            Olá, Cristian<br><b>Contas e Listas</b>
+        <div class="cart-icon" onclick="toggleCart()" style="cursor:pointer; font-size: 1.5rem;">
+            🛒 <span id="cart-count">0</span>
         </div>
     </div>
 </header>
 
-<div class="container">
-    <div class="product-card">
-        <h2>GRUPO APOIO PRODUTOS</h2>
-        <div class="image-box">
-            <img src="https://via.placeholder.com/200" alt="7X Ultra">
-        </div>
-        <div>
-            <div class="price-tag">R$ <sup>R$</sup><b>597</b><sup>,00</sup></div>
-            <button class="btn-amazon" onclick="enviarPedido('Dashboard 7X Ultra')">Comprar agora</button>
-        </div>
-    </div>
+<main class="main-content" id="productGrid">
+    </main>
 
-    <div class="product-card">
-        <h2>Consultoria (ME)</h2>
-        <div class="image-box">
-            <img src="https://via.placeholder.com/200" alt="Consultoria">
-        </div>
-        <div>
-            <div class="price-tag">R$ <sup>R$</sup><b>1.200</b><sup>,00</sup></div>
-            <button class="btn-amazon" onclick="enviarPedido('Consultoria SandxCDD')">Comprar agora</button>
+<div id="cart-sidebar">
+    <div class="cart-header">
+        <h2>Sua Sacola</h2>
+        <button onclick="toggleCart()">X</button>
+    </div>
+    <div class="cart-items" id="cartItems"></div>
+    <div class="cart-footer">
+        <h3>Total: R$ <span id="cartTotal">0,00</span></h3>
+        <div class="checkout-form">
+            <input type="text" id="custName" placeholder="Seu Nome">
+            <input type="text" id="custPhone" placeholder="Seu WhatsApp">
+            <button class="btn-telegram" onclick="finalizarPedido()">Finalizar com Vendedor</button>
         </div>
     </div>
 </div>
 
-<footer>
-    <p>Condições de Uso | Aviso de Privacidade | SandxCDD &copy; 2026</p>
-</footer>
-
 <script>
-    // Lógica para direcionar ao Telegram (Seu Bot)
-    function enviarPedido(item) {
-        const BOT_TOKEN = "SEU_BOT_TOKEN"; // Altere aqui
-        const CHAT_ID = "SEU_CHAT_ID";     // Altere aqui
-        const msg = `📦 *Novo Pedido Amazon-Style*\n\nO cliente solicitou: *${item}*\n\n_Aguardando contato para finalizar pagamento._`;
+    // 1. Simulação de Banco de Dados (Pode ser carregado via fetch('estoque.xml'))
+    const produtos = [
+        { id: 1, nome: "Parafuso Sextavado 5/16 x 1", preco: 597.00, img: "🔩" },
+        { id: 2, nome: "Consultoria Técnica (ME)", preco: 1200.00, img: "📊" },
+        { id: 3, nome: "Kit Atacado - Ferragens", preco: 850.50, img: "📦" }
+    ];
 
-        const url = `https://api.telegram.org/bot${BOT_TOKEN}/sendMessage?chat_id=${CHAT_ID}&text=${encodeURIComponent(msg)}&parse_mode=Markdown`;
+    let carrinho = [];
+
+    // 2. Função de Busca (Lógica que usamos no Mercado)
+    function filtrarProdutos() {
+        const query = document.getElementById('searchInput').value.toLowerCase();
+        const filtrados = produtos.filter(p => p.nome.toLowerCase().includes(query));
+        renderizarProdutos(filtrados);
+    }
+
+    function renderizarProdutos(lista) {
+        const grid = document.getElementById('productGrid');
+        grid.innerHTML = lista.map(p => `
+            <div class="product-card">
+                <div class="img-placeholder">${p.img}</div>
+                <div class="product-title">${p.nome}</div>
+                <div class="price-container"><small>R$</small>${p.preco.toLocaleString('pt-BR', {minimumFractionDigits: 2})}</div>
+                <button class="btn-add" onclick="adicionarAoCarrinho(${p.id})">Adicionar à Sacola</button>
+            </div>
+        `).join('');
+    }
+
+    // 3. Lógica do Carrinho
+    function adicionarAoCarrinho(id) {
+        const prod = produtos.find(p => p.id === id);
+        carrinho.push(prod);
+        atualizarInterfaceCarrinho();
+        if(!document.getElementById('cart-sidebar').classList.contains('active')) toggleCart();
+    }
+
+    function atualizarInterfaceCarrinho() {
+        document.getElementById('cart-count').innerText = carrinho.length;
+        const itensDiv = document.getElementById('cartItems');
+        itensDiv.innerHTML = carrinho.map((item, index) => `
+            <div style="display:flex; justify-content:space-between; margin-bottom:10px;">
+                <span>${item.nome}</span>
+                <b>R$ ${item.preco}</b>
+            </div>
+        `).join('');
+        
+        const total = carrinho.reduce((acc, item) => acc + item.preco, 0);
+        document.getElementById('cartTotal').innerText = total.toLocaleString('pt-BR', {minimumFractionDigits: 2});
+    }
+
+    function toggleCart() {
+        document.getElementById('cart-sidebar').classList.toggle('active');
+    }
+
+    // 4. Integração Telegram (Moderno e Seguro)
+    function finalizarPedido() {
+        const nome = document.getElementById('custName').value;
+        const fone = document.getElementById('custPhone').value;
+        
+        if(!nome || !fone) return alert("Por favor, preencha seus dados de contato.");
+
+        const BOT_TOKEN = "SEU_BOT_TOKEN"; // Use o seu token real
+        const CHAT_ID = "SEU_CHAT_ID";     // Use o seu chat id real
+
+        let listaItens = carrinho.map(i => `• ${i.nome} (R$ ${i.preco})`).join('%0A');
+        const total = document.getElementById('cartTotal').innerText;
+
+        const msg = `🛒 *NOVO PEDIDO - Grupo APOIO*%0A%0A👤 *Cliente:* ${nome}%0A📞 *WhatsApp:* ${fone}%0A%0A📦 *Produtos:*%0A${listaItens}%0A%0A💰 *TOTAL:* R$ ${total}%0A%0A_Aguardando finalização de pagamento (Pix/Cartão)_`;
+
+        const url = `https://api.telegram.org/bot${BOT_TOKEN}/sendMessage?chat_id=${CHAT_ID}&text=${msg}&parse_mode=Markdown`;
 
         fetch(url).then(res => {
-            if(res.ok) alert("Pedido enviado ao sistema central!");
+            if(res.ok) {
+                alert("Pedido enviado ao vendedor! Em breve entraremos em contato.");
+                carrinho = [];
+                atualizarInterfaceCarrinho();
+                toggleCart();
+            }
         });
     }
+
+    // Inicializar
+    renderizarProdutos(produtos);
 </script>
 
 </body>
