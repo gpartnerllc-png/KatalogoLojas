@@ -136,7 +136,7 @@
             </div>
             <div class="border-t border-white/5 pt-6 text-center">
                 <p class="text-[10px] text-gray-600 uppercase tracking-widest font-bold">
-                    &copy; 2026 GRUPO APOIO | x-PARTNER PERFORMANCE - TODOS OS DIREITOS RESERVADOS.
+                    © 2026 GRUPO APOIO | x-PARTNER PERFORMANCE - TODOS OS DIREITOS RESERVADOS.
                 </p>
             </div>
         </div>
@@ -329,17 +329,50 @@
         }
 
         async function finalizarParaVendedor() {
-            if(!metodoSelecionado || sacola.length === 0 || !document.getElementById('cli-nome').value) return alert("⚠️ Preencha os dados e escolha o pagamento!");
+            const nome = document.getElementById('cli-nome').value;
+            const whats = document.getElementById('cli-whats').value;
+            const endereco = document.getElementById('cli-rua').value;
+
+            if(!metodoSelecionado || sacola.length === 0 || !nome || !whats) {
+                return alert("⚠️ Preencha os dados e escolha o pagamento!");
+            }
+
             const btn = document.getElementById('btn-finalizar');
             btn.innerHTML = 'TRANSMITINDO...';
             btn.disabled = true;
-            
-            setTimeout(() => {
-                alert("✅ PEDIDO ENVIADO! confirmado.");
-                sacola = []; atualizarCarrinho(); toggleCarrinho();
+
+            let total = 0;
+            let listaItens = sacola.map(i => {
+                total += i.preco;
+                return `• ${i.nome} - R$ ${i.preco.toFixed(2)}`;
+            }).join('%0A');
+
+            const mensagem = `📦 *NOVO PEDIDO NO GRUPO APOIO` +
+                            `👤 *Cliente:* ${nome}%0A` +
+                            `📱 *WhatsApp:* ${whats}%0A` +
+                            `📍 *Endereço:* ${endereco}%0A` +
+                            `💳 *Pagamento:* ${metodoSelecionado}%0A%0A` +
+                            `🛒 *Itens:*%0A${listaItens}%0A%0A` +
+                            `💰 *TOTAL:* R$ ${total.toFixed(2)}`;
+
+            try {
+                const url = `https://api.telegram.org/bot${BOT_TOKEN}/sendMessage?chat_id=${CHAT_ID}&text=${mensagem}&parse_mode=Markdown`;
+                const response = await fetch(url);
+                
+                if(response.ok) {
+                    alert("✅ PEDIDO ENVIADO! Confirmado com sucesso.");
+                    sacola = []; 
+                    atualizarCarrinho(); 
+                    toggleCarrinho();
+                } else {
+                    alert("❌ Erro na transmissão. Tente novamente.");
+                }
+            } catch (err) {
+                alert("❌ Falha crítica de sinal. Verifique sua conexão.");
+            } finally {
                 btn.innerHTML = '<i class="fas fa-lock mr-2"></i> Finalizar Pedido Seguro';
                 btn.disabled = false;
-            }, 1500);
+            }
         }
     </script>
 </body>
