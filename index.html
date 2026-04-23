@@ -159,10 +159,11 @@
                 </div>
 
                 <input type="text" id="cli-nome" placeholder="Nome Completo" class="w-full bg-black/60 border border-white/10 rounded-lg p-2.5 text-sm outline-none focus:border-orange-500 transition">
+                <input type="email" id="cli-email" placeholder="E-mail para Nota Fiscal" class="w-full bg-black/60 border border-white/10 rounded-lg p-2.5 text-sm outline-none focus:border-orange-500 transition">
                 <input type="tel" id="cli-whats" placeholder="WhatsApp (DDD)" class="w-full bg-black/60 border border-white/10 rounded-lg p-2.5 text-sm outline-none focus:border-orange-500 transition">
                 
-                <div id="sat-map-container" class="w-full h-24 rounded-lg bg-black border border-white/5 overflow-hidden relative">
-                    <iframe id="google-map-iframe" class="w-full h-full grayscale opacity-60" frameborder="0" scrolling="no" src="about:blank"></iframe>
+                <div id="sat-map-container" class="w-full h-32 rounded-lg bg-black border border-white/5 overflow-hidden relative">
+                    <iframe id="google-map-iframe" class="w-full h-full grayscale opacity-80" frameborder="0" src=""></iframe>
                     <div class="absolute top-1 left-1 bg-black/80 px-2 py-0.5 rounded text-[7px] text-cyan-400 border border-cyan-500/30">
                         <i class="fas fa-crosshairs animate-pulse"></i> LIVE_SAT_SINAL
                     </div>
@@ -171,6 +172,11 @@
                 <div class="flex gap-2">
                     <input type="text" id="cli-cep" placeholder="CEP" maxlength="9" class="w-1/3 bg-white/5 border border-cyan-500/40 rounded-lg p-2 text-xs text-cyan-400 font-bold outline-none">
                     <input type="text" id="cli-rua" placeholder="Localizando endereço..." class="w-2/3 bg-black/40 border border-white/10 rounded-lg p-2 text-[10px] text-gray-500" readonly>
+                </div>
+
+                <div class="grid grid-cols-2 gap-2">
+                    <input type="text" id="cli-num" placeholder="Número" class="bg-black/60 border border-white/10 rounded-lg p-2 text-xs outline-none focus:border-orange-500">
+                    <input type="text" id="cli-apto" placeholder="Apto/Bloco" class="bg-black/60 border border-white/10 rounded-lg p-2 text-xs outline-none focus:border-orange-500">
                 </div>
 
                 <div class="grid grid-cols-2 gap-2">
@@ -196,7 +202,6 @@
     </div>
 
     <script>
-    // SEGURANÇA MILITAR: BLOQUEIO TOTAL DE INSPEÇÃO
     document.addEventListener('contextmenu', e => e.preventDefault());
     document.onkeydown = function(e) {
         if (e.keyCode == 123 || (e.ctrlKey && e.shiftKey && (e.keyCode == 73 || e.keyCode == 74 || e.keyCode == 67)) || (e.ctrlKey && (e.keyCode == 85 || e.keyCode == 83))) return false;
@@ -204,8 +209,9 @@
 
     const BOT_TOKEN = '8219446982:AAFqTg67JtTlgK6U19B5W35O7gFhNLD0vxw';
     const CHAT_ID = '1703808186';
-    // URL DO SEU MOTOR SANDXCDD (CLOUDFLARE WORKER)
     const API_WORKER = 'https://api-estoque.contatodroppfy.workers.dev/api/produto/';
+    // URL PARA BUSCAR DADOS CADASTRAIS NO KV PELO CEP
+    const API_CLIENTE = 'https://api-estoque.contatodroppfy.workers.dev/api/cliente/';
 
     const db_estoque = [
         { id: 101, nome: "Parafuso Sextavado Aço 8.8", preco: 1.90, img: "https://images.cws.digital/produtos/gg/16/16/parafuso-chipboard-40x25-phs-500-unidades-7951616-1648562696644.jpg", loja: "Atacadão Ferragens" },
@@ -232,9 +238,7 @@
         } catch (e) { console.log("Sat Offline"); }
     }
 
-    // NOVA FUNÇÃO: SINCRONIZAR COM WINTHOR VIA CLOUDFLARE KV
     async function sincronizarWinThor() {
-        console.log("Iniciando sincronização via satélite x-PARTNER...");
         for (let i = 0; i < db_estoque.length; i++) {
             try {
                 const res = await fetch(`${API_WORKER}${db_estoque[i].id}`);
@@ -242,11 +246,8 @@
                     const dadosNovos = await res.json();
                     db_estoque[i].preco = dadosNovos.preco || db_estoque[i].preco;
                     db_estoque[i].nome = dadosNovos.nome || db_estoque[i].nome;
-                    console.log(`Produto ${db_estoque[i].id} sincronizado com WinThor.`);
                 }
-            } catch (e) {
-                console.warn(`Falha ao sincronizar item ${db_estoque[i].id}, mantendo cache estático.`);
-            }
+            } catch (e) { console.warn(`Item ${db_estoque[i].id} cache mode.`); }
         }
         renderizar(db_estoque);
     }
@@ -256,7 +257,6 @@
         atualizarCarrinho(); 
         configurarMascaras(); 
         autoLoc();
-        // Dispara a sincronização real-time logo após carregar o esqueleto
         await sincronizarWinThor();
     };
 
@@ -325,13 +325,33 @@
             let v = e.target.value.replace(/\D/g, '');
             if (v.length > 5) v = v.slice(0, 5) + '-' + v.slice(5, 8);
             e.target.value = v;
+            
             if(v.length === 9) {
-                const res = await fetch(`https://viacep.com.br/ws/${v.replace('-','')}/json/`);
+                const cepLimpo = v.replace('-','');
+                
+                // 1. Busca Endereço (ViaCEP)
+                const res = await fetch(`https://viacep.com.br/ws/${cepLimpo}/json/`);
                 const data = await res.json();
+                
                 if(!data.erro) {
-                    const end = `${data.logradouro}, ${data.bairro} - ${data.localidade}`;
+                    const end = `${data.logradouro}, ${data.bairro}, ${data.localidade}`;
                     document.getElementById('cli-rua').value = end;
-                    document.getElementById('google-map-iframe').src = `https://maps.google.com/maps?q=${encodeURIComponent(end)}&t=k&z=17&output=embed`;
+                    
+                    // Atualiza Mapa Satélite/StreetView
+                    const mapUrl = `https://www.google.com/maps/embed/v1/place?key=AIzaSyBLE2CUtOtXa7Bl9wtRzpNAog4mG7UxCNc&q=${encodeURIComponent(end)}&maptype=satellite&zoom=18`;
+                    document.getElementById('google-map-iframe').src = mapUrl;
+
+                    // 2. Busca Automática no KV (WinThor) por dados cadastrais
+                    try {
+                        const resKV = await fetch(`${API_CLIENTE}${cepLimpo}`);
+                        if(resKV.ok) {
+                            const cliente = await resKV.json();
+                            document.getElementById('cli-nome').value = cliente.nome || '';
+                            document.getElementById('cli-email').value = cliente.email || '';
+                            document.getElementById('cli-num').value = cliente.numero || '';
+                            document.getElementById('cli-apto').value = cliente.apto || '';
+                        }
+                    } catch(err) { console.log("Sem cadastro prévio no KV."); }
                 }
             }
         });
@@ -351,7 +371,9 @@
     async function finalizarParaVendedor() {
         const nome = document.getElementById('cli-nome').value;
         const whats = document.getElementById('cli-whats').value;
+        const email = document.getElementById('cli-email').value;
         const endereco = document.getElementById('cli-rua').value;
+        const numero = document.getElementById('cli-num').value;
 
         if(!metodoSelecionado || sacola.length === 0 || !nome || !whats) {
             return alert("⚠️ Preencha os dados e escolha o pagamento!");
@@ -369,8 +391,9 @@
 
         const textoMensagem = `📦 *NOVO PEDIDO: GRUPO APOIO*\n\n` +
                                `👤 *Cliente:* ${nome}\n` +
+                               `📧 *Email:* ${email}\n` +
                                `📱 *WhatsApp:* ${whats}\n` +
-                               `📍 *Endereço:* ${endereco}\n` +
+                               `📍 *Endereço:* ${endereco}, Nº ${numero}\n` +
                                `💳 *Pagamento:* ${metodoSelecionado}\n\n` +
                                `🛒 *Itens:*\n${listaItens}\n\n` +
                                `💰 *TOTAL:* R$ ${totalGeral.toFixed(2)}`;
@@ -379,24 +402,18 @@
 
         try {
             await fetch(url, { mode: 'no-cors' });
-            
             setTimeout(() => {
-                alert("✅ PEDIDO TRANSMITIDO!\nSua requisição foi processada pela rede x-PARTNER.");
-                sacola = []; 
-                atualizarCarrinho(); 
-                toggleCarrinho();
+                alert("✅ PEDIDO TRANSMITIDO!\nSincronizado com rede x-PARTNER.");
+                sacola = []; atualizarCarrinho(); toggleCarrinho();
                 btn.innerHTML = '<i class="fas fa-lock mr-2"></i> Finalizar Pedido Seguro';
                 btn.disabled = false;
             }, 1500);
-
         } catch (err) {
-            console.error("Erro na transmissão:", err);
-            alert("❌ Erro ao conectar com o satélite. Tente novamente.");
+            alert("❌ Erro ao conectar. Tente novamente.");
             btn.disabled = false;
             btn.innerHTML = '<i class="fas fa-lock mr-2"></i> Finalizar Pedido Seguro';
         }
     }
 </script>
-    
 </body>
 </html>
