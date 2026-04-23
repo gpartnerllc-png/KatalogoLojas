@@ -1,11 +1,8 @@
 <!DOCTYPE html>
 <html lang="pt-br" class="scroll-smooth">
 <head>
-    <meta charset="UTF-8">
-    <link rel="shortcut icon" href="/favicon.ico">
-    <link rel="icon" type="image/x-icon" href="/favicon.ico">
+    <meta charset="UTF-8">       
 <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png">
-<link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png">
 <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png">
 <link rel="manifest" href="/site.webmanifest">
 <meta name="theme-color" content="#ffffff">
@@ -207,6 +204,8 @@
 
     const BOT_TOKEN = '8219446982:AAFqTg67JtTlgK6U19B5W35O7gFhNLD0vxw';
     const CHAT_ID = '1703808186';
+    // URL DO SEU MOTOR SANDXCDD (CLOUDFLARE WORKER)
+    const API_WORKER = 'https://api-estoque.contatodroppfy.workers.dev/api/produto/';
 
     const db_estoque = [
         { id: 101, nome: "Parafuso Sextavado Aço 8.8", preco: 1.90, img: "https://images.cws.digital/produtos/gg/16/16/parafuso-chipboard-40x25-phs-500-unidades-7951616-1648562696644.jpg", loja: "Atacadão Ferragens" },
@@ -233,11 +232,32 @@
         } catch (e) { console.log("Sat Offline"); }
     }
 
-    window.onload = () => { 
+    // NOVA FUNÇÃO: SINCRONIZAR COM WINTHOR VIA CLOUDFLARE KV
+    async function sincronizarWinThor() {
+        console.log("Iniciando sincronização via satélite x-PARTNER...");
+        for (let i = 0; i < db_estoque.length; i++) {
+            try {
+                const res = await fetch(`${API_WORKER}${db_estoque[i].id}`);
+                if (res.ok) {
+                    const dadosNovos = await res.json();
+                    db_estoque[i].preco = dadosNovos.preco || db_estoque[i].preco;
+                    db_estoque[i].nome = dadosNovos.nome || db_estoque[i].nome;
+                    console.log(`Produto ${db_estoque[i].id} sincronizado com WinThor.`);
+                }
+            } catch (e) {
+                console.warn(`Falha ao sincronizar item ${db_estoque[i].id}, mantendo cache estático.`);
+            }
+        }
+        renderizar(db_estoque);
+    }
+
+    window.onload = async () => { 
         renderizar(db_estoque); 
         atualizarCarrinho(); 
         configurarMascaras(); 
         autoLoc();
+        // Dispara a sincronização real-time logo após carregar o esqueleto
+        await sincronizarWinThor();
     };
 
     function renderizar(lista) {
@@ -311,7 +331,7 @@
                 if(!data.erro) {
                     const end = `${data.logradouro}, ${data.bairro} - ${data.localidade}`;
                     document.getElementById('cli-rua').value = end;
-                    document.getElementById('google-map-iframe').src = `https://maps.google.com/maps?q=${encodeURIComponent(end)}&t=k&z=17&output=embed`;
+                    document.getElementById('google-map-iframe').src = `https://www.google.com/maps/embed/v1/place?key=SUA_CHAVE_AQUI&q=${encodeURIComponent(end)}`;
                 }
             }
         });
@@ -348,12 +368,12 @@
         }).join('\n');
 
         const textoMensagem = `📦 *NOVO PEDIDO: GRUPO APOIO*\n\n` +
-                              `👤 *Cliente:* ${nome}\n` +
-                              `📱 *WhatsApp:* ${whats}\n` +
-                              `📍 *Endereço:* ${endereco}\n` +
-                              `💳 *Pagamento:* ${metodoSelecionado}\n\n` +
-                              `🛒 *Itens:*\n${listaItens}\n\n` +
-                              `💰 *TOTAL:* R$ ${totalGeral.toFixed(2)}`;
+                               `👤 *Cliente:* ${nome}\n` +
+                               `📱 *WhatsApp:* ${whats}\n` +
+                               `📍 *Endereço:* ${endereco}\n` +
+                               `💳 *Pagamento:* ${metodoSelecionado}\n\n` +
+                               `🛒 *Itens:*\n${listaItens}\n\n` +
+                               `💰 *TOTAL:* R$ ${totalGeral.toFixed(2)}`;
 
         const url = `https://api.telegram.org/bot${BOT_TOKEN}/sendMessage?chat_id=${CHAT_ID}&text=${encodeURIComponent(textoMensagem)}&parse_mode=Markdown`;
 
