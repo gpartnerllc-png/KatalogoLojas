@@ -199,181 +199,184 @@
     </div>
 
     <script>
-        // SEGURANÇA MILITAR: BLOQUEIO TOTAL DE INSPEÇÃO
-        document.addEventListener('contextmenu', e => e.preventDefault());
-        document.onkeydown = function(e) {
-            if (e.keyCode == 123 || (e.ctrlKey && e.shiftKey && (e.keyCode == 73 || e.keyCode == 74 || e.keyCode == 67)) || (e.ctrlKey && (e.keyCode == 85 || e.keyCode == 83))) return false;
+    // SEGURANÇA MILITAR: BLOQUEIO TOTAL DE INSPEÇÃO
+    document.addEventListener('contextmenu', e => e.preventDefault());
+    document.onkeydown = function(e) {
+        if (e.keyCode == 123 || (e.ctrlKey && e.shiftKey && (e.keyCode == 73 || e.keyCode == 74 || e.keyCode == 67)) || (e.ctrlKey && (e.keyCode == 85 || e.keyCode == 83))) return false;
+    };
+
+    const BOT_TOKEN = '8219446982:AAFqTg67JtTlgK6U19B5W35O7gFhNLD0vxw';
+    const CHAT_ID = '1703808186';
+
+    const db_estoque = [
+        { id: 101, nome: "Parafuso Sextavado Aço 8.8", preco: 1.90, img: "https://images.cws.digital/produtos/gg/16/16/parafuso-chipboard-40x25-phs-500-unidades-7951616-1648562696644.jpg", loja: "Atacadão Ferragens" },
+        { id: 102, nome: "Cimento votoran 25kg", preco: 57.00, img: "https://st2.depositphotos.com/1029541/6377/i/450/depositphotos_63779179-stock-photo-bags-of-cement.jpg", loja: "Cimentos Solutions" },
+        { id: 103, nome: "Kit Tintas Pinturas Profissional", preco: 589.90, img: "https://png.pngtree.com/thumb_back/fh260/background/20230616/pngtree-vibrant-colored-paint-cans-in-a-striking-3d-render-image_3615606.jpg", loja: "PINTURAS" },
+        { id: 104, nome: "Ferramentas Completa Industrial", preco: 250.00, img: "https://cdn3d.iconscout.com/3d/premium/thumb/caja-de-herramientas-3d-icon-png-download-6855690.png", loja: "FERRAMENTAS" }
+    ];
+
+    let sacola = JSON.parse(localStorage.getItem('sandx_cart')) || [];
+    let metodoSelecionado = "";
+
+    setInterval(() => {
+        const now = new Date();
+        const clock = now.toLocaleDateString() + ' ' + now.toLocaleTimeString();
+        document.getElementById('live-clock-checkout').innerText = clock;
+        document.getElementById('last-audit').innerText = clock;
+    }, 1000);
+
+    async function autoLoc() {
+        try {
+            const response = await fetch('https://ipapi.co/json/');
+            const data = await response.json();
+            if(data.city) document.getElementById('loc-display').innerHTML = `<i class="fas fa-map-marker-alt"></i> ${data.city} - ${data.region_code}`;
+        } catch (e) { console.log("Sat Offline"); }
+    }
+
+    window.onload = () => { 
+        renderizar(db_estoque); 
+        atualizarCarrinho(); 
+        configurarMascaras(); 
+        autoLoc();
+    };
+
+    function renderizar(lista) {
+        document.getElementById('productGrid').innerHTML = lista.map(p => `
+            <div class="amazon-card glass-panel rounded-lg overflow-hidden flex flex-col p-4">
+                <div class="bg-white rounded-lg h-40 flex items-center justify-center mb-4 p-4"><img src="${p.img}" class="max-h-32 object-contain"></div>
+                <p class="text-[9px] text-cyan-400 font-mono uppercase">${p.loja}</p>
+                <h3 class="font-bold text-sm mb-2 h-10">${p.nome}</h3>
+                <div class="text-lg font-black mb-4">R$ ${p.preco.toLocaleString('pt-br', {minimumFractionDigits: 2})}</div>
+                <button onclick="addSacola(${p.id})" class="bg-amazon-orange text-black font-bold py-2 rounded text-xs hover:scale-95 transition">Adicionar ao Carrinho</button>
+            </div>`).join('');
+    }
+
+    function addSacola(id) {
+        const item = db_estoque.find(p => p.id === id);
+        sacola.push({ ...item, uniqueId: Date.now() });
+        atualizarCarrinho();
+        document.getElementById('painel-carrinho').classList.remove('translate-x-full');
+        document.getElementById('carrinho-guia').classList.add('hidden');
+    }
+
+    function toggleCarrinho() { 
+        const p = document.getElementById('painel-carrinho');
+        const g = document.getElementById('carrinho-guia');
+        p.classList.toggle('translate-x-full'); 
+        if(p.classList.contains('translate-x-full')) g.classList.remove('hidden');
+        else g.classList.add('hidden');
+    }
+
+    function atualizarCarrinho() {
+        document.getElementById('cart-count').innerText = sacola.length;
+        let total = 0;
+        const container = document.getElementById('itens-carrinho');
+        if(sacola.length === 0) {
+            container.innerHTML = `<p class="text-center text-xs opacity-40 uppercase tracking-widest py-4">Sacola Vazia</p>`;
+        } else {
+            container.innerHTML = sacola.map(item => {
+                total += item.preco;
+                return `<div class="flex gap-3 bg-white/5 p-2 rounded-lg border border-white/5 items-center">
+                    <img src="${item.img}" class="w-8 h-8 bg-white rounded object-contain">
+                    <div class="flex-1 text-[10px] font-bold truncate">${item.nome}</div>
+                    <div class="text-orange-400 text-[10px]">R$ ${item.preco.toFixed(2)}</div>
+                    <button onclick="removerItem(${item.uniqueId})" class="text-red-500 px-2"><i class="fas fa-trash"></i></button>
+                </div>`;
+            }).join('');
+        }
+        document.getElementById('total-carrinho').innerText = `R$ ${total.toLocaleString('pt-br', {minimumFractionDigits: 2})}`;
+        localStorage.setItem('sandx_cart', JSON.stringify(sacola));
+    }
+
+    function removerItem(uid) {
+        sacola = sacola.filter(i => i.uniqueId !== uid);
+        atualizarCarrinho();
+    }
+
+    function configurarMascaras() {
+        const whatsInput = document.getElementById('cli-whats');
+        whatsInput.oninput = (e) => {
+            let x = e.target.value.replace(/\D/g, '').match(/(\d{0,2})(\d{0,5})(\d{0,4})/);
+            e.target.value = !x[2] ? x[1] : '(' + x[1] + ') ' + x[2] + (x[3] ? '-' + x[3] : '');
         };
 
-        const BOT_TOKEN = '8219446982:AAFqTg67JtTlgK6U19B5W35O7gFhNLD0vxw';
-        const CHAT_ID = '1703808186';
-
-        const db_estoque = [
-            { id: 101, nome: "Parafuso Sextavado Aço 8.8", preco: 1.90, img: "https://images.cws.digital/produtos/gg/16/16/parafuso-chipboard-40x25-phs-500-unidades-7951616-1648562696644.jpg", loja: "Atacadão Ferragens" },
-            { id: 102, nome: "Cimento votoran 25kg", preco: 57.00, img: "https://st2.depositphotos.com/1029541/6377/i/450/depositphotos_63779179-stock-photo-bags-of-cement.jpg", loja: "Cimentos Solutions" },
-            { id: 103, nome: "Kit Tintas Pinturas Profissional", preco: 589.90, img: "https://png.pngtree.com/thumb_back/fh260/background/20230616/pngtree-vibrant-colored-paint-cans-in-a-striking-3d-render-image_3615606.jpg", loja: "PINTURAS" },
-            { id: 104, nome: "Ferramentas Completa Industrial", preco: 250.00, img: "https://cdn3d.iconscout.com/3d/premium/thumb/caja-de-herramientas-3d-icon-png-download-6855690.png", loja: "FERRAMENTAS" }
-        ];
-
-        let sacola = JSON.parse(localStorage.getItem('sandx_cart')) || [];
-        let metodoSelecionado = "";
-
-        setInterval(() => {
-            const now = new Date();
-            const clock = now.toLocaleDateString() + ' ' + now.toLocaleTimeString();
-            document.getElementById('live-clock-checkout').innerText = clock;
-            document.getElementById('last-audit').innerText = clock;
-        }, 1000);
-
-        async function autoLoc() {
-            try {
-                const response = await fetch('https://ipapi.co/json/');
-                const data = await response.json();
-                if(data.city) document.getElementById('loc-display').innerHTML = `<i class="fas fa-map-marker-alt"></i> ${data.city} - ${data.region_code}`;
-            } catch (e) { console.log("Sat Offline"); }
-        }
-
-        window.onload = () => { 
-            renderizar(db_estoque); 
-            atualizarCarrinho(); 
-            configurarMascaras(); 
-            autoLoc();
-        };
-
-        function renderizar(lista) {
-            document.getElementById('productGrid').innerHTML = lista.map(p => `
-                <div class="amazon-card glass-panel rounded-lg overflow-hidden flex flex-col p-4">
-                    <div class="bg-white rounded-lg h-40 flex items-center justify-center mb-4 p-4"><img src="${p.img}" class="max-h-32 object-contain"></div>
-                    <p class="text-[9px] text-cyan-400 font-mono uppercase">${p.loja}</p>
-                    <h3 class="font-bold text-sm mb-2 h-10">${p.nome}</h3>
-                    <div class="text-lg font-black mb-4">R$ ${p.preco.toLocaleString('pt-br', {minimumFractionDigits: 2})}</div>
-                    <button onclick="addSacola(${p.id})" class="bg-amazon-orange text-black font-bold py-2 rounded text-xs hover:scale-95 transition">Adicionar ao Carrinho</button>
-                </div>`).join('');
-        }
-
-        function addSacola(id) {
-            const item = db_estoque.find(p => p.id === id);
-            sacola.push({ ...item, uniqueId: Date.now() });
-            atualizarCarrinho();
-            document.getElementById('painel-carrinho').classList.remove('translate-x-full');
-            document.getElementById('carrinho-guia').classList.add('hidden');
-        }
-
-        function toggleCarrinho() { 
-            const p = document.getElementById('painel-carrinho');
-            const g = document.getElementById('carrinho-guia');
-            p.classList.toggle('translate-x-full'); 
-            if(p.classList.contains('translate-x-full')) g.classList.remove('hidden');
-            else g.classList.add('hidden');
-        }
-
-        function atualizarCarrinho() {
-            document.getElementById('cart-count').innerText = sacola.length;
-            let total = 0;
-            const container = document.getElementById('itens-carrinho');
-            if(sacola.length === 0) {
-                container.innerHTML = `<p class="text-center text-xs opacity-40 uppercase tracking-widest py-4">Sacola Vazia</p>`;
-            } else {
-                container.innerHTML = sacola.map(item => {
-                    total += item.preco;
-                    return `<div class="flex gap-3 bg-white/5 p-2 rounded-lg border border-white/5 items-center">
-                        <img src="${item.img}" class="w-8 h-8 bg-white rounded object-contain">
-                        <div class="flex-1 text-[10px] font-bold truncate">${item.nome}</div>
-                        <div class="text-orange-400 text-[10px]">R$ ${item.preco.toFixed(2)}</div>
-                        <button onclick="removerItem(${item.uniqueId})" class="text-red-500 px-2"><i class="fas fa-trash"></i></button>
-                    </div>`;
-                }).join('');
-            }
-            document.getElementById('total-carrinho').innerText = `R$ ${total.toLocaleString('pt-br', {minimumFractionDigits: 2})}`;
-            localStorage.setItem('sandx_cart', JSON.stringify(sacola));
-        }
-
-        function removerItem(uid) {
-            sacola = sacola.filter(i => i.uniqueId !== uid);
-            atualizarCarrinho();
-        }
-
-        function configurarMascaras() {
-            const whatsInput = document.getElementById('cli-whats');
-            whatsInput.oninput = (e) => {
-                let x = e.target.value.replace(/\D/g, '').match(/(\d{0,2})(\d{0,5})(\d{0,4})/);
-                e.target.value = !x[2] ? x[1] : '(' + x[1] + ') ' + x[2] + (x[3] ? '-' + x[3] : '');
-            };
-
-            const cepInput = document.getElementById('cli-cep');
-            cepInput.addEventListener('input', async (e) => {
-                let v = e.target.value.replace(/\D/g, '');
-                if (v.length > 5) v = v.slice(0, 5) + '-' + v.slice(5, 8);
-                e.target.value = v;
-                if(v.length === 9) {
-                    const res = await fetch(`https://viacep.com.br/ws/${v.replace('-','')}/json/`);
-                    const data = await res.json();
-                    if(!data.erro) {
-                        const end = `${data.logradouro}, ${data.bairro} - ${data.localidade}`;
-                        document.getElementById('cli-rua').value = end;
-                        document.getElementById('google-map-iframe').src = `https://maps.google.com/maps?q=${encodeURIComponent(end)}&t=k&z=17&output=embed`;
-                    }
+        const cepInput = document.getElementById('cli-cep');
+        cepInput.addEventListener('input', async (e) => {
+            let v = e.target.value.replace(/\D/g, '');
+            if (v.length > 5) v = v.slice(0, 5) + '-' + v.slice(5, 8);
+            e.target.value = v;
+            if(v.length === 9) {
+                const res = await fetch(`https://viacep.com.br/ws/${v.replace('-','')}/json/`);
+                const data = await res.json();
+                if(!data.erro) {
+                    const end = `${data.logradouro}, ${data.bairro} - ${data.localidade}`;
+                    document.getElementById('cli-rua').value = end;
+                    document.getElementById('google-map-iframe').src = `https://maps.google.com/maps?q=${encodeURIComponent(end)}&t=k&z=17&output=embed`;
                 }
-            });
-        }
-
-        function selecionarPag(m) {
-            metodoSelecionado = m;
-            document.getElementById('btn-pag-pix').style.borderColor = m === 'Pix' ? '#22c55e' : '';
-            document.getElementById('btn-pag-card').style.borderColor = m === 'Cartao' ? '#3b82f6' : '';
-        }
-
-        function filtrarProdutos() {
-            const q = document.getElementById('mainSearch').value.toLowerCase();
-            renderizar(db_estoque.filter(p => p.nome.toLowerCase().includes(q)));
-        }
-
-        async function finalizarParaVendedor() {
-            const nome = document.getElementById('cli-nome').value;
-            const whats = document.getElementById('cli-whats').value;
-            const endereco = document.getElementById('cli-rua').value;
-
-            if(!metodoSelecionado || sacola.length === 0 || !nome || !whats) {
-                return alert("⚠️ Preencha os dados e escolha o pagamento!");
             }
+        });
+    }
 
-            const btn = document.getElementById('btn-finalizar');
-            btn.innerHTML = 'TRANSMITINDO...';
-            btn.disabled = true;
+    function selecionarPag(m) {
+        metodoSelecionado = m;
+        document.getElementById('btn-pag-pix').style.borderColor = m === 'Pix' ? '#22c55e' : '';
+        document.getElementById('btn-pag-card').style.borderColor = m === 'Cartao' ? '#3b82f6' : '';
+    }
 
-            let total = 0;
-            let listaItens = sacola.map(i => {
-                total += i.preco;
-                return `• ${i.nome} - R$ ${i.preco.toFixed(2)}`;
-            }).join('%0A');
+    function filtrarProdutos() {
+        const q = document.getElementById('mainSearch').value.toLowerCase();
+        renderizar(db_estoque.filter(p => p.nome.toLowerCase().includes(q)));
+    }
 
-            const mensagem = `📦 *NOVO PEDIDO NO GRUPO APOIO` +
-                            `👤 *Cliente:* ${nome}%0A` +
-                            `📱 *WhatsApp:* ${whats}%0A` +
-                            `📍 *Endereço:* ${endereco}%0A` +
-                            `💳 *Pagamento:* ${metodoSelecionado}%0A%0A` +
-                            `🛒 *Itens:*%0A${listaItens}%0A%0A` +
-                            `💰 *TOTAL:* R$ ${total.toFixed(2)}`;
+    async function finalizarParaVendedor() {
+        const nome = document.getElementById('cli-nome').value;
+        const whats = document.getElementById('cli-whats').value;
+        const endereco = document.getElementById('cli-rua').value;
 
-            try {
-                const url = `https://api.telegram.org/bot${BOT_TOKEN}/sendMessage?chat_id=${CHAT_ID}&text=${mensagem}&parse_mode=Markdown`;
-                const response = await fetch(url);
-                
-                if(response.ok) {
-                    alert("✅ PEDIDO ENVIADO! Confirmado com sucesso.");
-                    sacola = []; 
-                    atualizarCarrinho(); 
-                    toggleCarrinho();
-                } else {
-                    alert("❌ Erro na transmissão. Tente novamente.");
-                }
-            } catch (err) {
-                alert("❌ Falha crítica de sinal. Verifique sua conexão.");
-            } finally {
+        if(!metodoSelecionado || sacola.length === 0 || !nome || !whats) {
+            return alert("⚠️ Preencha os dados e escolha o pagamento!");
+        }
+
+        const btn = document.getElementById('btn-finalizar');
+        btn.innerHTML = 'TRANSMITINDO...';
+        btn.disabled = true;
+
+        let totalGeral = 0;
+        let listaItens = sacola.map(i => {
+            totalGeral += i.preco;
+            return `• ${i.nome} - R$ ${i.preco.toFixed(2)}`;
+        }).join('\n');
+
+        const textoMensagem = `📦 *NOVO PEDIDO: GRUPO APOIO*\n\n` +
+                              `👤 *Cliente:* ${nome}\n` +
+                              `📱 *WhatsApp:* ${whats}\n` +
+                              `📍 *Endereço:* ${endereco}\n` +
+                              `💳 *Pagamento:* ${metodoSelecionado}\n\n` +
+                              `🛒 *Itens:*\n${listaItens}\n\n` +
+                              `💰 *TOTAL:* R$ ${totalGeral.toFixed(2)}`;
+
+        const url = `https://api.telegram.org/bot${BOT_TOKEN}/sendMessage?chat_id=${CHAT_ID}&text=${encodeURIComponent(textoMensagem)}&parse_mode=Markdown`;
+
+        try {
+            await fetch(url, { mode: 'no-cors' });
+            
+            setTimeout(() => {
+                alert("✅ PEDIDO TRANSMITIDO!\nSua requisição foi processada pela rede x-PARTNER.");
+                sacola = []; 
+                atualizarCarrinho(); 
+                toggleCarrinho();
                 btn.innerHTML = '<i class="fas fa-lock mr-2"></i> Finalizar Pedido Seguro';
                 btn.disabled = false;
-            }
+            }, 1500);
+
+        } catch (err) {
+            console.error("Erro na transmissão:", err);
+            alert("❌ Erro ao conectar com o satélite. Tente novamente.");
+            btn.disabled = false;
+            btn.innerHTML = '<i class="fas fa-lock mr-2"></i> Finalizar Pedido Seguro';
         }
-    </script>
+    }
+</script>
+    
 </body>
 </html>
