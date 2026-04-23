@@ -331,7 +331,7 @@
                 if(!data.erro) {
                     const end = `${data.logradouro}, ${data.bairro} - ${data.localidade}`;
                     document.getElementById('cli-rua').value = end;
-                    document.getElementById('google-map-iframe').src = `https://www.google.com/maps/embed/v1/place?key=SUA_CHAVE_AQUI&q=${encodeURIComponent(end)}`;
+                    document.getElementById('google-map-iframe').src = `https://maps.google.com/maps?q=${encodeURIComponent(end)}&t=k&z=17&output=embed`;
                 }
             }
         });
